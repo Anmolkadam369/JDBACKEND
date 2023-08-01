@@ -128,11 +128,11 @@ const registerAdministration = async (req, res)=>{
 
     //hashing password 
     let hashing = bcrypt.hashSync(password, 10);
-    registerAdministrationInfo.password = hashing;
+    registerAdministrationInfo.password = hashing; 
 
     //______________________________
     
-    let logInTime = new Date().getHours() + ":" + new Date().getMinutes() +":" + new Date().getSeconds() + ":"+ new Date().getMilliseconds();
+    let logInTime = new Date().getDate() + "/" + new Date().getMonth() + "/" + new Date().getFullYear()
     registerAdministrationInfo.Date = logInTime;
     console.log(values)
     registerAdministrationInfo.tasks = values;
@@ -146,13 +146,72 @@ const registerAdministration = async (req, res)=>{
     console.log("employeeCreated : ", employeeCreated)
     // let createdJd = await employeeJdModel.create(employeeJd);
 
-    return res.status(200).send({status:true, message: "user created", data : employeeCreated})
+    return res.status(201).send({status:true, message: "user created", data : employeeCreated})
   }
   catch (error){
     return res.status(500).send({status: false, message: error.message});
 }
 }
 
+
+const loginAdministration = async(req,res)=>{
+  try{
+    let loginData = req.body;
+    let{email, password} = loginData;
+    //________________________________________________________
+    if (!email)
+      return res.status(400).send({ status: false, message: "email is mandatory" });
+    if(typeof(email) != "string"){
+      return res.status(400).send({status: false, message:" please send proper email"})
+    }
+    email = loginData.email = email.trim().toLowerCase();
+    if(email == "")
+      return res.status(400).send({status: false, message:" please send proper email"})
+//_____________________________________________________
+    
+     if (!password)
+      return res.status(400).send({ status: false, message: "password is mandatory" });
+
+    if (typeof password != "string")
+      return res.status(400).send({ status: false, message: "please provide password in string " });
+
+    password = loginData.password = password.trim();
+    if (password == "")
+      return res.status(400).send({ status: false, message: "Please provide password value" });
+
+
+    //regex password
+    // if (!validation.validatePassword(password))
+      // return res.status(400).send({ status: false, message: "8-15 characters, one lowercase letter, one number and maybe one UpperCase & one special character" });
+
+    // Encrypting password
+    // let hashing = bcrypt.hashSync(password, 10);
+    // loginData.password = hashing;
+//_____________________________________________________
+console.log("email", email)
+    // let isAdministrationExist = await administrationModel.findOne({email:email});
+    let isAdministrationExist = await administrationModel.findOne({emailId:email})
+    console.log("bruh",isAdministrationExist)
+    if(!isAdministrationExist)
+      return res.status(404).send({status:false, message:"Email doesn't exists "})
+      console.log("some",password, isAdministrationExist.password)
+    let passwordCompare = await bcrypt.compare(password, isAdministrationExist.password)
+    console.log(passwordCompare);
+  if(!passwordCompare) 
+    return res.status(404).send({status:false, message:"password doesn't match"});
+    let token = jwt.sign(
+      {administrationId : isAdministrationExist.emailId,  exp: Math.floor(Date.now() / 1000) + 86400}, "aeccisecurity");
+     let tokenInfo = { userId: isAdministrationExist._id, token: token };
+     console.log(tokenInfo);
+
+    res.setHeader('x-api-key', token)
+
+    return res.status(200).send({ status: true, message: "Admin login successfully", data: tokenInfo });
+}
+catch(error){
+  return res.status(500).send({status:false, message:error.message})
+}
+}
 
 const getadministrationList = async (req,res)=>{
   let getInfo = await administrationModel.find();
@@ -307,19 +366,18 @@ const updateInfo = async (req,res)=>{
   }
 }
 
-const deleteEmployee = async (req, res)=>{
-  try {
-    const empolyeeId = req.params.empolyeeId;
-    if (!isValidObjectId(userId)) 
-      return res.status(400).send({status:false, message:"provide valid empolyeeId" })
+// const deleteEmployee = async (req, res)=>{
+//   try {
+//     const empolyeeId = req.params.empolyeeId;
 
-      let getInfo = await administrationModel.findOneAndUpdate({employeeId : employeeId, isDeleted:false },{$set:{isDeleted:true, deletedAt : Date.now()}});
-     return res.status(200).send({ status: true, message: "success", message: "deleted successfully " })
-  } catch (error) {
-     return res.status(500).send({ status: false, message: err.message })
-  }
-}
+//       let getInfo = await administrationModel.findOneAndUpdate({employeeId : empolyeeId, isDeleted:false },{$set:{isDeleted:true, deletedAt : Date.now()}},{new:true});
+//      console.log(getInfo)
+//       return res.status(200).send({ status: true, message: "success", message: "deleted successfully " , data: getInfo})
+//   } catch (error) {
+//      return res.status(500).send({ status: false, message: error.message })
+//   }
+// }
 
-module.exports = {registerAdministration,getadministrationList,getWantedAdministrationList, updateInfo, deleteEmployee }
+module.exports = {registerAdministration,loginAdministration,getadministrationList,getWantedAdministrationList, updateInfo, /*deleteEmployee*/ }
 
 

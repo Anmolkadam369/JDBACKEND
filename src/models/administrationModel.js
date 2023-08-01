@@ -44,11 +44,10 @@ const administrationSchema = new mongoose.Schema({
     type: String,
     // required: true
   },
-  Date:{
-    type: String,  
-    default:Date.now(),
-    // required:true
-  },
+  // Date:{
+  //   type: String,  
+  //   // required:true
+  // },
   tasks : {
     type:[],
     required:true

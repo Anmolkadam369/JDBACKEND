@@ -4,6 +4,9 @@ const adminController = require("../controllers/adminController");
 const superAdminController =require("../controllers/superAdminController");
 const administrationController = require("../controllers/administrationController");
 const employeeJdController = require("../controllers/employeeJdController");
+const clientEmailController = require("../controllers/clients/clientEmailController");
+const clientGSTNoController = require("../controllers/clients/clientGSTNoController")
+const auth = require("../middleware/auth")
 
 // const auth = require('../middlewares/auth')
 //const aws = require("../middlewares/awsLink");
@@ -22,15 +25,23 @@ router.get("/loginSuperAdmin",superAdminController.loginSuperAdmin);
 
 //Employee
 router.post("/registerAdministration", administrationController.registerAdministration);
-router.get("/getadministrationList", administrationController.getadministrationList);
-router.get("/getWantedAdministrationList/:employeeId", administrationController.getWantedAdministrationList);
+router.get("/loginAdministration", administrationController.loginAdministration)
+router.get("/getadministrationList", auth.authentication,administrationController.getadministrationList);
+router.get("/getWantedAdministrationList/:administrationId", administrationController.getWantedAdministrationList);
 router.put("/updateInfo/:paramsId", administrationController.updateInfo);
-router.delete("/deleteEmployee", administrationController.deleteEmployee);
-
-
+// router.delete("/deleteEmployee/:employeeId", administrationController.deleteEmployee);
+           
 // JD 
-router.post("/createEmployeeJd", employeeJdController.createEmployeeJd )
+router.post("/createEmployeeJd/:employeeID", employeeJdController.createEmployeeJd );
+router.post ("/logOutJd/:jdId", employeeJdController.logOut);
+router.get("/thirtyMin/:jdId", employeeJdController.thirtyMinTimesUp);
+router.get("/fifteenMin/:jdId", employeeJdController.fifteenMinTimesUp);
 
+//clientEmail
+router.post("/createClientEmail", clientEmailController.createClientEmail);
+
+// clientGSTNo
+router.post("/createGSTNo", clientGSTNoController.createGSTNo); 
 
 
 router.all("*/", async(req,res)=>{

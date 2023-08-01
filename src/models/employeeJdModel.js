@@ -7,38 +7,35 @@ const employeeJdSchema = new mongoose.Schema({
     // },
     employeeName:{
         //get data through reference and populate
-        type:objectId,
-        ref:"administration"
+        type:String,
+        required: true,
+        trim:true
+        
     },
     Designation:{
         //get data through reference and populate
-        type:objectId,
-        ref:"administration"
+        type:String,
+        required: true,
+        trim:true
+        
     },
     timeIn : {
         type: String,  
-        default:Date.now(),
         required:true
     },
     jobRole : {
         type:String,
-        required: true,
         trim:true
     },
     jobDescription:{
         type:String,
-        required:true,
         trim:true
     },
-    // timeOut:{
-    //     type:String,
-    //     default:Date.now(),
-    //     required: true
-    // },
     preparedBy : {       
         //get data through reference and populate
-        type:objectId,
-        ref:"administration"
+        type:String, 
+        required:true,
+        trim:true
     },
     isDeleted:{
         type:Boolean, 

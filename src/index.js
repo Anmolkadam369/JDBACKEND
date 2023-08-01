@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const multer = require("multer");
+const cors = require("cors")
 const port = process.env.PORT || 3000;
 const router = require("./routes/route");
 mongoose.set("strictQuery", true);
@@ -8,6 +9,7 @@ const app = express();
 
 app.use(express.json());
 app.use(multer().any());
+app.use(cors());
 
 mongoose
   .connect(
