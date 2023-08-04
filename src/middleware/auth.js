@@ -21,11 +21,6 @@ const authentication =  (req, res, next) => {
             // Assuming the JWT payload contains a 'role' field that indicates the user's role
             // add krdo role bhi
 
-
-            if (decoded.administrationId !== "hr@gmail.com") {
-                return res.status(403).send({ status: false, message: "Access restricted to HR only" });
-            }
-
             req.administrationId = decoded.administrationId;
             next();
         });
@@ -36,21 +31,22 @@ const authentication =  (req, res, next) => {
 
 const authorization = async (req, res, next) => {
     try {
-        let tokenId = req.administrationId;
-        let paramUserId = req.params.administrationId;
+        let tokenId = req.administrationId;   //objectId of that registerEmplyee
+        let paramUserId = req.params.employeeId;   //objectId of that registerEmplyee
 
         // Check if paramUserId is provided and is a valid ObjectId
         if (paramUserId) {
-            if (!isValidObjectId(paramUserId)) {
-                return res.status(400).send({ status: false, message: "Invalid user id" });
-            }
 
             let userData = await administrationModel.findById(paramUserId);
+            console.log(userData)
 
             // If the user with the provided userId does not exist
             if (!userData) {
                 return res.status(404).send({ status: false, message: "No user found for this UserId" });
             }
+            if(userData.emailId == "hr@aecci.org.in")
+            return res.status(400).send({ status: false, message: "You cannot create JD" });
+                
 
             // If the userId in the request parameters is not the same as the userId from the token
             if (paramUserId !== tokenId) {
@@ -58,7 +54,7 @@ const authorization = async (req, res, next) => {
             }
 
         }
-
+        req.employeeID = paramUserId;
         // If paramUserId is not provided , allow access
         next();
 
@@ -67,4 +63,40 @@ const authorization = async (req, res, next) => {
     }
 };
 
-module.exports = {authentication, authorization}
+
+const authorizationForHr = async (req, res, next) => {
+    try {
+        let tokenId = req.administrationId;   //objectId of that registerEmplyee
+        let paramUserId = req.params.employeeId;   //objectId of that registerEmplyee
+
+        // Check if paramUserId is provided and is a valid ObjectId
+        if (paramUserId) {
+
+            let userData = await administrationModel.findById(paramUserId);
+            console.log(userData)
+
+            // If the user with the provided userId does not exist
+            if (!userData) {
+                return res.status(404).send({ status: false, message: "No user found for this UserId" });
+            }
+            if(userData.emailId !== "hr@aecci.org.in")
+            return res.status(400).send({ status: false, message: "You Are Not Authorize" });
+                
+            console.log(paramUserId , " ", tokenId)
+            // If the userId in the request parameters is not the same as the userId from the token
+            if (paramUserId !== tokenId) {
+                return res.status(403).send({ status: false, message: "Unauthorized User Access" });
+            }
+
+        }
+        req.employeeID = paramUserId;
+        // If paramUserId is not provided , allow access
+        next();
+
+    } catch (error) {
+        return res.status(500).send({ status: false, message: error.message });
+    }
+};
+
+
+module.exports = {authentication, authorization,authorizationForHr}

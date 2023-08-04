@@ -26,4 +26,3 @@ const  createGSTNo = async (req,res)=>{
     }
 }
 
-module.exports = {createGSTNo};

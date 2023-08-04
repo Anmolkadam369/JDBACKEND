@@ -31,6 +31,10 @@ const employeeJdSchema = new mongoose.Schema({
         type:String,
         trim:true
     },
+    logOut:{
+        type:String,
+        default:"00:00"
+    },
     preparedBy : {       
         //get data through reference and populate
         type:String, 

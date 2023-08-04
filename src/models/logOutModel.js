@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const logOutSchema = new mongoose.Schema({
+   
     timeOut:{
         type:String,
         required:true

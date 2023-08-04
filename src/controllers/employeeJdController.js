@@ -9,7 +9,7 @@ const logOutModel = require('../models/logOutModel');
 
 const createEmployeeJd= async (req,res)=>{
     try {
-        let employeeId = req.params.employeeID;
+        let employeeId = req.employeeID;
                 // console.log("employeeId",typeof(employeeId))
                 // const _id = mongoose.Types.ObjectId();
                 const _idssss = new ObjectId(employeeId);
@@ -29,7 +29,7 @@ const createEmployeeJd= async (req,res)=>{
         
                  let logInTimeInMiliseconds = Date.now();
         
-                let logInTime = new Date().getHours() + ":" + new Date().getMinutes() +":" + new Date().getSeconds() + ":"+ new Date().getMilliseconds();
+                let logInTime = new Date().getHours() + ":" + new Date().getMinutes();
                 timeIn = employeeJd.timeIn = logInTime;
     
                 //______________________________________________________________________________
@@ -60,35 +60,55 @@ const createEmployeeJd= async (req,res)=>{
 
 let userPressedLogout = false;
 //THIS IS BUTTON PRESSED BY USER HIMSELF
+
+// const logOut = async (req,res)=>{
+//         try {
+//             let jdId = req.params.jdId;
+//             let employeeJd = req.body;
+//             let {timeOut} = employeeJd;
+//             let showJd = await employeeJdModel.findById(jdId);
+//             if(!showJd) return res.status(404).send({status:false, message:"No Jd found"});
+//             if(!showJd.jobRole || !showJd.jobDescription) return res.status(400).send({status:false, message:"fill necessary info"});
+//             let logInTimeInMiliseconds= req.logInTimeInMiliseconds;
+//             let logOutTimeInMiliseconds = Date.now();
+
+//             let logOutTime = new Date().getHours() + ":" + new Date().getMinutes();
+//             timeOut = employeeJd.timeOut = logOutTime;
+//             userPressedLogout=true;
+//             // logInTimeInMiliseconds = Number(logInTimeInMiliseconds);
+//             // logOutTimeInMiliseconds= Number(logOutTimeInMiliseconds);
+//             // console.log(logOutTimeInMiliseconds - logInTimeInMiliseconds)
+//             // console.log(typeof (logOutTimeInMiliseconds))
+
+//             // let timeTakenForTask = (((logOutTimeInMiliseconds-logInTimeInMiliseconds)/1000)/100);
+//             // console.log(timeTakenForTask)
+//             // console.log(`${timeTakenForTask} minutes taken for the task`);
+//             let createLogOut= await logOutModel.create(employeeJd);
+//             return res.status(201).send({status:true, message:" logout done", data:createLogOut});
+//         } catch (error) {
+//         return res.status(500).send({status:false, message:error.message})
+//         }
+// }
 const logOut = async (req,res)=>{
         try {
             let jdId = req.params.jdId;
             let employeeJd = req.body;
-            let {timeOut} = employeeJd;
             let showJd = await employeeJdModel.findById(jdId);
             if(!showJd) return res.status(404).send({status:false, message:"No Jd found"});
             if(!showJd.jobRole || !showJd.jobDescription) return res.status(400).send({status:false, message:"fill necessary info"});
-            let logInTimeInMiliseconds= req.logInTimeInMiliseconds;
-            let logOutTimeInMiliseconds = Date.now();
 
             let logOutTime = new Date().getHours() + ":" + new Date().getMinutes();
             timeOut = employeeJd.timeOut = logOutTime;
+            console.log(timeOut)
             userPressedLogout=true;
-            // logInTimeInMiliseconds = Number(logInTimeInMiliseconds);
-            // logOutTimeInMiliseconds= Number(logOutTimeInMiliseconds);
-            // console.log(logOutTimeInMiliseconds - logInTimeInMiliseconds)
-            // console.log(typeof (logOutTimeInMiliseconds))
-
-            // let timeTakenForTask = (((logOutTimeInMiliseconds-logInTimeInMiliseconds)/1000)/100);
-            // console.log(timeTakenForTask)
-            // console.log(`${timeTakenForTask} minutes taken for the task`);
-            let createLogOut= await logOutModel.create(employeeJd);
-            return res.status(201).send({status:true, message:" logout done", data:createLogOut});
+            
+            let createLogOut= await employeeJdModel.findOneAndUpdate({_id:jdId},{$set:{logOut:timeOut}},{new:true});
+            
+            return res.status(200).send({status:true, message:" logout done", data:createLogOut});
         } catch (error) {
         return res.status(500).send({status:false, message:error.message})
         }
 }
-
 //__________________________________________________________________________________________________
 
 
@@ -127,19 +147,41 @@ const fifteenMinTimesUp = async (req,res)=>{
 }
 
 //this is HR's api 
-if(count==2){
-    let extendtime=true;
-    if(extendtime == true){
-        count--;
-         fifteenMinTimesUp();
-        }
-    else return res.status(400).send({status:false, message:"no more extended time for user !!!"})
-}
+const extendTime = async (req,res)=>{
+    try {
+        let extendtime = req.body.extendTime;
+        console.log(extendtime)
+     
+            if(extendtime == true){
+                count--;
+                 let duration = 1;
+                 console.log("before");
+                timeDone(duration,res)
+                console.log("after");
 
+                }
+            else return res.status(400).send({status:false, message:"no more extended time for user !!!"})
+    } catch (error) {
+        return res.status(500).send({status:false, message:error.message})
+    }
+
+}
 
 //__________________________________________________________________________________________________
 
-
+const getWantedAdministrationList = async (req,res)=>{
+    try{
+      const employeeId = req.params.normalEmployee;
+      console.log(employeeId)
+       let employeeInfo =await administrationModel.findById(employeeId);
+       if(!employeeInfo) return res.status(400).send({status: false, message:"No user Found"})
+      let getInfo = await employeeJdModel.find({Designation:employeeInfo.designation});
+      console.log(getInfo)
+      if(!getInfo)return res.status(400).send({status: false, message:"No Data Found of JD"})
+    res.status(200).send({status:true, message: "employees information ", data : getInfo })
+    }
+     catch (err) { return res.status(500).send({ status: false, message: err.message }) }
+  }
 
 
 
@@ -154,7 +196,7 @@ const getJdData = async (req,res)=>{
 }
 
 
-module.exports = {createEmployeeJd,logOut, thirtyMinTimesUp, fifteenMinTimesUp};
+module.exports = {createEmployeeJd,logOut, thirtyMinTimesUp, fifteenMinTimesUp,extendTime,getWantedAdministrationList};
 
 
 

@@ -10,7 +10,34 @@ const comercialDirectory = require('../../models/clients/comercialDirectory');
 const createClient = async (req, res) => {
     try {
         let clientsAllData = req.body;
-        let { companyName, GSTNo, IECNo, websiteAdd, address1, address2, address3, address4, country, state, pinCode, businessCategory, howDidYouKnowAboutUs, title, firstName, surName, role, email, password, confirmPassword, telephoneNo, phoneNo, registeredBank, branchDetails } = clientsAllData;
+        let { selectMembership,companyName, GSTNo, IECNo, websiteAdd, address1, address2, address3, address4, country, state, pinCode, businessCategory, howDidYouKnowAboutUs, title, firstName, surName, role, email, password, confirmPassword, telephoneNo, phoneNo, registeredBank, branchDetails } = clientsAllData;
+        //_______________selectMembership____________________
+        if(!selectMembership)
+            return res.status(400).send({ status: false, message: "companyName is required" });
+        
+        
+     if (selectMembership == "")
+     return res.status(400).send({ status: false, message: "Please Enter selectMembership value" });
+
+   
+   if(typeof(selectMembership) != "string")
+     return res.status(400).send({status: false, message: "selectMembership should be in String"});
+   
+   let expectedValues = ["Small Business", "Start- Up","Corporate", "Non Profit Org", "Overseas", "Corporate +", "Digital User"];
+   
+   //show benefits to the user according to the choice
+
+  let answers = selectMembership
+  console.log("answers ", answers)
+   let count = 0;
+   for(let i=0; i<expectedValues.length; i++){
+     console.log(expectedValues[i]);
+     if(expectedValues[i]==selectMembership)
+       count++;
+   }
+   console.log("count ", count)
+   if(count != 1) return res.status(400).send({status:false, message:"please provide correct information 111111."});     
+
         //______________companyName________________
 
         if (!companyName)
@@ -400,6 +427,10 @@ const changePassword = async (req,res)=>{
 
 const commercialDir = async (req,res)=>{
     try {
+        let id = req.params;
+        let isAvailable = await clientModel.findById(id);
+        if(!isAvailable) 
+        return res.status(404).send({status:false, message:"no data found "})
         let dirInfo = req.body;
         let {companyLogo,companyName,ownersName,email,establishmentYear,companyAdd,mobileNo,companyProduct,companyActivity}=dirInfo;
         

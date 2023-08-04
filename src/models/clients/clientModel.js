@@ -1,6 +1,11 @@
 const mongoose = require('mongoose')
 
 const clientSchema = new mongoose.Schema({
+    "selectMembership":{
+        type:String,
+        required:true,
+        trim : true
+    },
     "companyName":{
         type:String,
         required:true,
