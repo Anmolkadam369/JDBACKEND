@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const administrationSchema = new mongoose.Schema({
    profileImage: {    //staffPhoto if there is any
         type: String,
-        // required: true,
+        required: true,
         trim: true
    },
   departmentName:{
@@ -17,7 +17,7 @@ const administrationSchema = new mongoose.Schema({
     trim : true
   },
   employeeId : {
-    type: Number,
+    type: String,
     required: true
   },
   designation:{
@@ -44,10 +44,10 @@ const administrationSchema = new mongoose.Schema({
     type: String,
     // required: true
   },
-  // Date:{
-  //   type: String,  
-  //   // required:true
-  // },
+  Date:{
+    type: String,  
+    required:true
+  },
   tasks : {
     type:[],
     required:true

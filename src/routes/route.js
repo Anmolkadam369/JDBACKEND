@@ -9,6 +9,7 @@ const clientEmailController = require("../controllers/clients/clientEmailControl
 const clientGSTNoController = require("../controllers/clients/clientGSTNoController");
 const recomendationLetterController= require("../controllers/clients/recomendationletterController");
 const auth = require("../middleware/auth");
+const aws = require("../middleware/aws")
 
 // const auth = require('../middlewares/auth')
 //const aws = require("../middlewares/awsLink");
@@ -26,23 +27,37 @@ router.post("/registerSuperAdmin",  superAdminController.registerSuperAdmin);
 router.get("/loginSuperAdmin",superAdminController.loginSuperAdmin);
 
 //Employee
-router.post("/registerAdministration", administrationController.registerAdministration);
+router.post("/registerAdministration",aws.awsLinkEmployeeProfile,aws.awsLinkEmployeeSignature, administrationController.registerAdministration);
 router.get("/loginAdministration", administrationController.loginAdministration, administrationController.getWantedAdministrationList)
 router.get("/loginHR", administrationController.loginHR)
 router.get("/getMyaccount/:employeeId", auth.authentication,administrationController.getMyaccount);
 // router.get("/getWantedAdministrationList/:employeeId", administrationController.getWantedAdministrationList);
 router.put("/updateInfo/:paramsId", administrationController.updateInfo);
 // router.delete("/deleteEmployee/:employeeId", administrationController.deleteEmployee);
-           
+router.post ("/administration/forgotPassword", administrationController.forgotPasword)
+// router.post ("administration/resetPassword", administrationController.resetPassword)
+
 // JD 
+//for first Time clicking
 router.post("/createEmployeeJd/:employeeId",auth.authentication,auth.authorization, employeeJdController.createEmployeeJd );
+//for next Line of JD
+router.post("/createAnotherOne/:employeeId",auth.authentication,auth.authorization,employeeJdController.createEmployeeJdForNextTime )
 router.post ("/logOutJd/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.logOut);
 router.post("/thirtyMin/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.thirtyMinTimesUp);
 router.post("/fifteenMin/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.fifteenMinTimesUp);
 
+
+
 //HR 
-router.post("/extendedTime/:employeeId",auth.authentication,auth.authorizationForHr,employeeJdController.extendTime);
+router.post("/extendedTime/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,employeeJdController.extendTime);
 router.get("/getWantedAdministrationList/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,employeeJdController.getWantedAdministrationList);
+
+//need to add employeeId in path but now in this case we are simply checking it
+router.get("/getWantedAdministrationList/:normalEmployee",employeeJdController.getWantedAdministrationList);
+router.get("/getWantedListByDate/:normalEmployee",employeeJdController.getWantedAdministrationList)
+
+
+
 
 //client
 router.post("/createClient", clientController.createClient);

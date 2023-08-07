@@ -4,6 +4,11 @@ const administrationModel = require ('../models/administrationModel');
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
 const employeeJdModel = require("../models/employeeJdModel");
+const nodemailer = require('nodemailer');
+const crypto = require("crypto")
+require('dotenv').config();
+const forgotPasswordModel = require("../models/forgotPasswordModel")
+
 // const validation = require("../validations/validation");
 const registerAdministration = async (req, res)=>{
   try{
@@ -11,9 +16,20 @@ const registerAdministration = async (req, res)=>{
     let {profileImage,departmentName,officerName,employeeId,emailId,userName,password,designation,date,signature} = registerAdministrationInfo;
       //registration of an employee his/her photo
     //registerAdministration.profileImage = req.image;
-    //____________________
     
-//____________________departmentName __________
+    
+    //_______________________________Extarnal Data_________________________________________________
+    
+    profileImage = registerAdministrationInfo.profileImage = req.image;
+    signature = registerAdministrationInfo.signature = req.image;
+    let dated = new Date().getDate()
+    let month = String(new Date().getMonth()+1)
+    let year = new Date().getFullYear()
+    console.log("month",month)
+    let registrationDate = `${dated}-${month}-${year}`;
+    date = registerAdministrationInfo.date = registrationDate;    
+
+    //____________________departmentName __________
     if(!departmentName)
       return res.status(400).send({status: false, message: "departmentName is required"});
 
@@ -78,8 +94,8 @@ const registerAdministration = async (req, res)=>{
       return res.status(400).send({status: false, message: "employeeId is required"});
 
       console.log(typeof(employeeId));
-     if(typeof(employeeId) != "number")
-      return res.status(400).send({status: false, message: "employeeId should be in Number"});
+     if(typeof(employeeId) != "string")
+      return res.status(400).send({status: false, message: "employeeId should be in string"});
 
     if (employeeId == "")
       return res.status(400).send({ status: false, message: "Please Enter employeeId value" });
@@ -326,6 +342,21 @@ const updateInfo = async (req,res)=>{
     //registerAdministration.profileImage = req.image;
     //____________________
     
+      //_______________________________Extarnal Data_________________________________________________
+    if(profileImage)
+    profileImage = updateEmployeeInfo.profileImage = req.image;
+
+    if(signature)
+    signature = updateEmployeeInfo.signature = req.image;
+
+    let dated = new Date().getDate()
+    let month = String(new Date().getMonth()+1)
+    let year = new Date().getFullYear()
+    console.log("month",month)
+    let registrationDate = `${dated}-${month}-${year}`;
+    date = updateEmployeeInfo.date = registrationDate;  
+
+
 //____________________departmentName __________
     if(departmentName){
      if (departmentName == "")
@@ -452,6 +483,82 @@ const updateInfo = async (req,res)=>{
   }
 }
 
+
+// Create a transporter
+const transporter = nodemailer.createTransport({
+  service: 'Gmail', // e.g., 'Gmail'
+  auth: {
+    user: "developeraecci@gmail.com",
+    pass: "WD0996##"
+  }
+});
+
+// Function to send forgot password email
+const sendForgotPasswordEmail = (email, token) => {
+  console.log("problem",process.env.some_some)
+  console.log("problem",process.env.EMAIL_USER)
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER, // Your email address
+    to: email,
+    subject: 'Password Reset',
+    text: `Click the link to reset your password: http://localhost:3000/administration/resetPasword/${token}`
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log('Error sending email:', error);
+    } else {
+      console.log('Email sent:', info.response);
+    }
+  });
+};
+
+const forgotPasword =async (req, res) => {
+  const forgotPassword = req.body.email;
+  let {email,resetToken,resetTokenExpires} = forgotPassword;
+  // Find forgotPassword by email (you should replace this with your database query)
+  const foundforgotPassword = administrationModel.findOne({emailId: email});
+  if (!foundforgotPassword) {
+    return res.status(404).json({ message: 'user not found' });
+  }
+
+  // Generate and store reset token
+  const token = crypto.randomBytes(20).toString('hex');
+  console.log("token:",token)
+
+  email=forgotPassword.email = email;
+  resetToken = forgotPassword.resetToken = token;
+  console.log("resetToken:",resetToken)
+
+  resetTokenExpires = forgotPassword.resetTokenExpires = Date.now() + 3600000; // Token expires in 1 hour
+  console.log("resetTokenExpires:",resetTokenExpires)
+  console.log("forgotPassword:      ", forgotPassword)
+
+  sendForgotPasswordEmail(email,token)
+};
+
+const resetPassword = (req, res) => {
+  const { token, newPassword } = req.body;
+
+  // Find user by reset token and check expiration
+  const user = users.find(u => u.resetToken === token && u.resetTokenExpires > Date.now());
+
+  if (!user) {
+    return res.status(400).json({ message: 'Invalid or expired token' });
+  }
+
+  // Update user's password (you should hash the password)
+  user.password = newPassword;
+  user.resetToken = null;
+  user.resetTokenExpires = null;
+
+  return res.json({ message: 'Password reset successful' });
+}
+
+
+
+
 // const deleteEmployee = async (req, res)=>{
 //   try {
 //     const empolyeeId = req.params.empolyeeId;
@@ -464,6 +571,6 @@ const updateInfo = async (req,res)=>{
 //   }
 // }
 
-module.exports = {registerAdministration,loginAdministration,loginHR,getMyaccount,getWantedAdministrationList, updateInfo, /*deleteEmployee*/ }
+module.exports = {registerAdministration,loginAdministration,loginHR,getMyaccount,getWantedAdministrationList, updateInfo, forgotPasword /*deleteEmployee*/ }
 
 

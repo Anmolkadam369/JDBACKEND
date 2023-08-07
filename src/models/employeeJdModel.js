@@ -8,16 +8,20 @@ const employeeJdSchema = new mongoose.Schema({
     employeeName:{
         //get data through reference and populate
         type:String,
-        required: true,
+        // required: true,
         trim:true
         
     },
     Designation:{
         //get data through reference and populate
         type:String,
-        required: true,
+        // required: true,
         trim:true
         
+    },
+    today:{
+        type: String,  
+        required:true
     },
     timeIn : {
         type: String,  
@@ -38,7 +42,7 @@ const employeeJdSchema = new mongoose.Schema({
     preparedBy : {       
         //get data through reference and populate
         type:String, 
-        required:true,
+        // required:true,
         trim:true
     },
     isDeleted:{

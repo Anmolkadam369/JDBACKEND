@@ -18,14 +18,19 @@ const createEmployeeJd= async (req,res)=>{
         
                 let employeeJd = req.body;
                 console.log(employeeJd);
-                let {employeeName,Designation, timeIn, preparedBy, jobRole, jobDescription}=employeeJd;
+                let {employeeName,Designation,today, timeIn, preparedBy, jobRole, jobDescription}=employeeJd;
         
                 let names = await administrationModel.findById(_idssss).select({officerName:1,designation:1, _id:0});
-                console.log("populate ",names);
-        
+                console.log("officer Name:",names.officerName)
                 employeeName=employeeJd.employeeName= names.officerName;
                 Designation=employeeJd.Designation= names.designation;
-                preparedBy = employeeJd.preparedBy = names.officerName; 
+                preparedBy = employeeJd.preparedBy = names.officerName;
+
+                let dated = new Date().getDate()
+                let month = String(new Date().getMonth()+1)
+                let year = new Date().getFullYear()
+                let dates = dated+"/"+month+"/"+year;
+                today = employeeJd.today = dates; 
         
                  let logInTimeInMiliseconds = Date.now();
         
@@ -53,6 +58,55 @@ const createEmployeeJd= async (req,res)=>{
                 req.timeIn = timeIn;
                 // next()
                 return res.status(201).send({status:true, message:"JD Created", data:createdJd})
+    } catch (error) {
+        return res.status(500).send({status:false, message:error.message})
+    }
+}
+
+const createEmployeeJdForNextTime= async (req,res)=>{
+    try {
+        let employeeId = req.employeeID;
+                // console.log("employeeId",typeof(employeeId))
+                // const _id = mongoose.Types.ObjectId();
+                const _idssss = new ObjectId(employeeId);
+                // console.log("id",typeof(_idssss))
+                // console.log(_idssss)
+        
+                let employeeJd = req.body;
+                console.log(employeeJd);
+                let { today, timeIn, jobRole, jobDescription}=employeeJd;
+                let dated = new Date().getDate()
+                let month = String(new Date().getMonth()+1)
+                let year = new Date().getFullYear()
+                let dates = dated+"/"+month+"/"+year;
+                today = employeeJd.today = dates; 
+        
+                 let logInTimeInMiliseconds = Date.now();
+        
+                let logInTime = new Date().getHours() + ":" + new Date().getMinutes();
+                timeIn = employeeJd.timeIn = logInTime;
+    
+                //______________________________________________________________________________
+                
+                if(jobRole){
+                    console.log(typeof jobRole)
+                    if(jobRole == "")
+                    return res.status(400).send({status:false, message:"job role is required"});
+                    }
+                    //______________________________________________________________________________
+            
+                    if(jobDescription){
+                    // if(jobDescription != "string")
+                    // return res.status(400).send({status:false, message:"job Description is required"});
+                    if(jobDescription == "")
+                    return res.status(400).send({status:false, message:"job Description is required bro"});
+                    }
+                    req.logInTimeInMiliseconds=logInTimeInMiliseconds;
+                
+                let createdJd = await employeeJdModel.create(employeeJd);
+                req.timeIn = timeIn;
+                // next()
+                return res.status(201).send({status:true, message:"JD Created for another Time", data:createdJd})
     } catch (error) {
         return res.status(500).send({status:false, message:error.message})
     }
@@ -149,18 +203,17 @@ const fifteenMinTimesUp = async (req,res)=>{
 //this is HR's api 
 const extendTime = async (req,res)=>{
     try {
-        let extendtime = req.body.extendTime;
-        console.log(extendtime)
-     
-            if(extendtime == true){
+        const employeeId = req.params.normalEmployee;
+      console.log(employeeId)
+       let employeeInfo =await administrationModel.findById(employeeId);
+       if(!employeeInfo) return res.status(400).send({status: false, message:"No user Found"})
+       
                 count--;
                  let duration = 1;
                  console.log("before");
                 timeDone(duration,res)
                 console.log("after");
 
-                }
-            else return res.status(400).send({status:false, message:"no more extended time for user !!!"})
     } catch (error) {
         return res.status(500).send({status:false, message:error.message})
     }
@@ -168,22 +221,41 @@ const extendTime = async (req,res)=>{
 }
 
 //__________________________________________________________________________________________________
-
+//only for that day JD Data
 const getWantedAdministrationList = async (req,res)=>{
     try{
       const employeeId = req.params.normalEmployee;
       console.log(employeeId)
        let employeeInfo =await administrationModel.findById(employeeId);
        if(!employeeInfo) return res.status(400).send({status: false, message:"No user Found"})
-      let getInfo = await employeeJdModel.find({Designation:employeeInfo.designation});
-      console.log(getInfo)
+       let dated = new Date().getDate()
+       let month = String(new Date().getMonth()+1)
+       let year = new Date().getFullYear()
+       let dates = dated+"/"+month+"/"+year; 
+      let getInfo = await employeeJdModel.find({today:dates});
+      console.log(getInfo, dates)
       if(!getInfo)return res.status(400).send({status: false, message:"No Data Found of JD"})
     res.status(200).send({status:true, message: "employees information ", data : getInfo })
     }
      catch (err) { return res.status(500).send({ status: false, message: err.message }) }
   }
-
-
+//Datewise selected JD Data
+const getWantedListByDate = async (req,res)=>{
+    try{
+        let dates = req.body.date;
+      const employeeId = req.params.normalEmployee;
+      console.log(employeeId)
+      if(!dates) return res.status(400).send({status: false, message:"Send Data"})
+       let employeeInfo =await administrationModel.findById(employeeId);
+       if(!employeeInfo) return res.status(400).send({status: false, message:"No user Found"})
+       
+      let getInfo = await employeeJdModel.find({today:dates});
+      console.log(getInfo, dates)
+      if(!getInfo)return res.status(400).send({status: false, message:"No Data Found of JD"})
+    res.status(200).send({status:true, message: "employees information ", data : getInfo })
+    }
+     catch (err) { return res.status(500).send({ status: false, message: err.message }) }
+  }
 
 
 const getJdData = async (req,res)=>{
@@ -196,7 +268,7 @@ const getJdData = async (req,res)=>{
 }
 
 
-module.exports = {createEmployeeJd,logOut, thirtyMinTimesUp, fifteenMinTimesUp,extendTime,getWantedAdministrationList};
+module.exports = {createEmployeeJd,createEmployeeJdForNextTime, logOut, thirtyMinTimesUp, fifteenMinTimesUp,extendTime,getWantedAdministrationList,getWantedListByDate};
 
 
 
