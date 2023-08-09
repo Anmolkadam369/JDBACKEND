@@ -29,7 +29,7 @@ const createEmployeeJd= async (req,res)=>{
                 let dated = new Date().getDate()
                 let month = String(new Date().getMonth()+1)
                 let year = new Date().getFullYear()
-                let dates = dated+"/"+month+"/"+year;
+                let dates = year+"/"+month+"/"+dated;
                 today = employeeJd.today = dates; 
         
                  let logInTimeInMiliseconds = Date.now();

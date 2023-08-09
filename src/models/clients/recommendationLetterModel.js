@@ -9,7 +9,7 @@ const recomendationLetter = new mongoose.Schema({
         type:String,
         required:true
     },
-    MemberShipNo:{
+    region:{
         type:String,
         required:true
     },
@@ -33,7 +33,7 @@ const recomendationLetter = new mongoose.Schema({
         type:String,
         required:true
     },
-    causeOfVisit:{
+    purposeOfVisit:{
         type:String,
         required:true
     },
@@ -41,7 +41,15 @@ const recomendationLetter = new mongoose.Schema({
         type:Number,
         required:true
     },
+    location:{
+        type:String,
+        required:true
+    },
     DateOfIssue:{
+        type:Number,
+        required:true
+    },
+    DateOfExpiry:{
         type:Number,
         required:true
     },
@@ -57,20 +65,21 @@ const recomendationLetter = new mongoose.Schema({
         type:String,
         required:true
     },
-    adharcard:{
-        type:String,
-        required:true
-    },
+    // adharcard:{
+    //     type:String,
+    //     required:true
+    // },
     EPLastYear:{
         type:String,
         required:true
     },
     companyProfile:{
         type:String,
+        required:true
     },
-    bankGurantee:{
-        type:String,
-    },
+    // bankGurantee:{
+    //     type:String,
+    // },
     ITR:{
         type:String,
     },

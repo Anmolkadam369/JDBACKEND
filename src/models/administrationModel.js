@@ -48,10 +48,10 @@ const administrationSchema = new mongoose.Schema({
     type: String,  
     required:true
   },
-  tasks : {
-    type:[],
-    required:true
-  },
+  // tasks : {
+  //   type:[],
+  //   required:true
+  // },
 
       deletedAt: {
         type: Date

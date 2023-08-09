@@ -1,5 +1,4 @@
 let mongoose = require('mongoose')
-let clientEmail = require("../../models/clients/clientModel");
 const clientModel = require('../../models/clients/clientModel');
 const bcrypt = require('bcrypt');
 const clientPasswordChangeModel = require('../../models/clients/clientPasswordChangeModel');
@@ -335,6 +334,61 @@ const createClient = async (req, res) => {
     }
 }
 
+const loginClient = async(req,res)=>{
+    try{
+      let loginData = req.body;
+      let{email, password} = loginData;
+      //________________________________________________________
+      if (!email)
+        return res.status(400).send({ status: false, message: "email is mandatory" });
+      if(typeof(email) != "string"){
+        return res.status(400).send({status: false, message:" please send proper email"})
+      }
+      email = loginData.email = email.trim().toLowerCase();
+      if(email == "")
+        return res.status(400).send({status: false, message:" please send proper email"})
+  //_____________________________________________________
+      
+       if (!password)
+        return res.status(400).send({ status: false, message: "password is mandatory" });
+  
+      if (typeof password != "string")
+        return res.status(400).send({ status: false, message: "please provide password in string " });
+  
+      password = loginData.password = password.trim();
+      if (password == "")
+        return res.status(400).send({ status: false, message: "Please provide password value" });
+  
+  
+      //regex password
+      // if (!validation.validatePassword(password))
+        // return res.status(400).send({ status: false, message: "8-15 characters, one lowercase letter, one number and maybe one UpperCase & one special character" });
+  
+      //Encrypting password
+    //   let hashing = bcrypt.hashSync(password, 10);
+    //   userData.password = hashing;
+  //_____________________________________________________
+      let isClientExists = await clientModel.findOne({email:email});
+      if(!isClientExists)
+        return res.status(404).send({status:false, message:"Email doesn't exists "})
+  
+      let passwordCompare = await bcrypt.compare(password, isClientExists.password)
+    if(!passwordCompare) 
+      return res.status(404).send({status:false, message:"password doesn't match"});
+      let token = jwt.sign(
+        {clientId : isClientExists.email,  exp: Math.floor(Date.now() / 1000) + 86400}, "aeccisecurity");
+       let tokenInfo = { userId: isClientExists._id, token: token };
+  
+      res.setHeader('x-api-key', token)
+  
+      return res.status(200).send({ status: true, message: "Admin login successfully", data: tokenInfo });
+  }
+      
+    catch(error){
+      return res.status(500).send({status:false, message:error.message})
+    }
+  }
+
 const getCompanyDetails = async (req, res) => {
     try {
         let clientId = req.params;
@@ -526,16 +580,9 @@ if (companyActivity == "")
     }
 }
 
-// const seeCommercialDir = async (req,res)=>{
-//     try {
-        
-//     } catch (error) {
-//         return res.status(500).send({ status: false, message: error.message })
-        
-//     }
-// }
 
 
 
 
-module.exports = { createClient,getCompanyDetails, getClientPersonalInfo,changePassword,commercialDir};
+
+module.exports = { createClient,loginClient,getCompanyDetails, getClientPersonalInfo,changePassword,commercialDir};

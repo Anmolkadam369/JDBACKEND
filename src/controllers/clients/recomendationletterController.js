@@ -1,19 +1,18 @@
 let mongoose = require('mongoose')
 let recomendationLetterModel = require("../../models/clients/recommendationLetterModel");
+const clientModel = require('../../models/clients/clientModel');
 
-const createRecomendationLetter = (req, res) => {
+const createRecomendationLetter =async (req, res) => {
     try {
+        let companyId = req.params.companyId;
         let recomendationLetter = req.body;
         let { companyName, MemberShipNo, region, country, addressesTo, fullAddress, applicantName, designation, causeOfVisit, passportNo, DateOfIssue, requestingLetter, invitationLetter, passportCopy, EPLastYear, companyProfile, bankGurantee, ITR, SalaryCertificate, comauthrepresentative, signofrepresentative } = recomendationLetter;
 
-        if (!companyName)
-            return res.status(400).send({ status: false, message: "companyName is required" });
-
-        if (typeof (companyName) != "string")
-            return res.status(400).send({ status: false, message: "companyName should be in String" });
-
-        if (companyName == "")
-            return res.status(400).send({ status: false, message: "Please Enter companyName value" });
+        let getCompanyDetails = await clientModel.findById(companyId);
+        if (!getCompanyDetails)return res.status(404).send({ status: false, message: "no Company Found" });
+        companyName = recomendationLetter.companyName = getCompanyDetails.companyName;
+        fullAddress = recomendationLetter.fullAddress = getCompanyDetails.address1;
+        
         //__________________________________________________________________________________________________________
         if (!MemberShipNo)
             return res.status(400).send({ status: false, message: "MemberShipNo is required" });
@@ -51,14 +50,7 @@ const createRecomendationLetter = (req, res) => {
         if (addressesTo == "")
             return res.status(400).send({ status: false, message: "Please Enter addressesTo value" });
         //__________________________________________________________________________________________________________
-        if (!fullAddress)
-            return res.status(400).send({ status: false, message: "fullAddress is required" });
-
-        if (typeof (fullAddress) != "string")
-            return res.status(400).send({ status: false, message: "fullAddress should be in String" });
-
-        if (fullAddress == "")
-            return res.status(400).send({ status: false, message: "Please Enter fullAddress value" });
+        
         //__________________________________________________________________________________________________________
 
         if (!applicantName)
@@ -81,20 +73,33 @@ const createRecomendationLetter = (req, res) => {
             return res.status(400).send({ status: false, message: "Please Enter designation value" });
         //__________________________________________________________________________________________________________
 
-        if (!causeOfVisit)
-            return res.status(400).send({ status: false, message: "causeOfVisit is required" });
+        if (!location)
+        return res.status(400).send({ status: false, message: "location is required" });
 
-        if (typeof (causeOfVisit) != "string")
-            return res.status(400).send({ status: false, message: "causeOfVisit should be in String" });
+    if (typeof (location) != "string")
+        return res.status(400).send({ status: false, message: "location should be in String" });
 
-        if (causeOfVisit == "")
-            return res.status(400).send({ status: false, message: "Please Enter causeOfVisit value" });
+    if (location == "")
+        return res.status(400).send({ status: false, message: "Please Enter location value" });
+
+
+        //__________________________________________________________________________________________________________
+
+
+        if (!purposeOfVisit)
+            return res.status(400).send({ status: false, message: "purposeOfVisit is required" });
+
+        if (typeof (purposeOfVisit) != "string")
+            return res.status(400).send({ status: false, message: "purposeOfVisit should be in String" });
+
+        if (purposeOfVisit == "")
+            return res.status(400).send({ status: false, message: "Please Enter purposeOfVisit value" });
         //__________________________________________________________________________________________________________
 
         if (!passportNo)
             return res.status(400).send({ status: false, message: "passportNo is required" });
 
-        if (typeof (passportNo) != "string")
+        if (typeof (passportNo) != "number")
             return res.status(400).send({ status: false, message: "passportNo should be in String" });
 
         if (passportNo == "")
@@ -104,12 +109,22 @@ const createRecomendationLetter = (req, res) => {
         if (!DateOfIssue)
             return res.status(400).send({ status: false, message: "DateOfIssue is required" });
 
-        if (typeof (DateOfIssue) != "string")
+        if (typeof (DateOfIssue) != "number")
             return res.status(400).send({ status: false, message: "DateOfIssue should be in String" });
 
         if (DateOfIssue == "")
             return res.status(400).send({ status: false, message: "Please Enter DateOfIssue value" });
         //__________________________________________________________________________________________________________
+
+        if (!DateOfExpiry)
+        return res.status(400).send({ status: false, message: "DateOfExpiry is required" });
+
+    if (typeof (DateOfExpiry) != "number")
+        return res.status(400).send({ status: false, message: "DateOfExpiry should be in String" });
+
+    if (DateOfExpiry == "")
+        return res.status(400).send({ status: false, message: "Please Enter DateOfExpiry value" });
+    //__________________________________________________________________________________________________________
 
         if (!requestingLetter)
             return res.status(400).send({ status: false, message: "requestingLetter is required" });
@@ -139,14 +154,14 @@ const createRecomendationLetter = (req, res) => {
         if (passportCopy == "")
             return res.status(400).send({ status: false, message: "Please Enter passportCopy value" });
         //__________________________________________________________________________________________________________
-        if (!adharcard)
-            return res.status(400).send({ status: false, message: "adharcard is required" });
+        // if (!adharcard)
+        //     return res.status(400).send({ status: false, message: "adharcard is required" });
 
-        if (typeof (adharcard) != "string")
-            return res.status(400).send({ status: false, message: "adharcard should be in String" });
+        // if (typeof (adharcard) != "string")
+        //     return res.status(400).send({ status: false, message: "adharcard should be in String" });
 
-        if (adharcard == "")
-            return res.status(400).send({ status: false, message: "Please Enter adharcard value" });
+        // if (adharcard == "")
+        //     return res.status(400).send({ status: false, message: "Please Enter adharcard value" });
         //__________________________________________________________________________________________________________
         if (!EPLastYear)
             return res.status(400).send({ status: false, message: "EPLastYear is required" });
@@ -165,16 +180,11 @@ const createRecomendationLetter = (req, res) => {
 
         if (companyProfile == "")
             return res.status(400).send({ status: false, message: "Please Enter companyProfile value" });
-        //__________________________________________________________________________________________________________
-        if (!bankGurantee)
-            return res.status(400).send({ status: false, message: "bankGurantee is required" });
-
-        if (typeof (bankGurantee) != "string")
-            return res.status(400).send({ status: false, message: "bankGurantee should be in String" });
-
-        if (bankGurantee == "")
-            return res.status(400).send({ status: false, message: "Please Enter bankGurantee value" });
-        //__________________________________________________________________________________________________________
+        
+        
+        
+            //__________________________________________________________________________________________________________
+        if(designation === "General Manager" ){
         if (ITR) {
 
             if (typeof (ITR) != "string")
@@ -211,7 +221,7 @@ const createRecomendationLetter = (req, res) => {
                 return res.status(400).send({ status: false, message: "Please Enter signofrepresentative value" });
         }
         //__________________________________________________________________________________________________________
-
+}
         const recomendationLetterCreated = recomendationLetterModel.create(recomendationLetter);
         return res.status(201).send({ status: true, message: "successfully ", data: recomendationLetterCreated })
 
@@ -223,10 +233,21 @@ const createRecomendationLetter = (req, res) => {
 const viewData = async (req, res) => {
     try {
         let id = req.params.id;
+        let wannaViewrequestingLetter = req.params.requestingLetter;
+        let wannaViewinvitationLetter = req.params.invitationLetter;
+        
         let isAvailable = await recomendationLetterModel.findById(id);
         if (!isAvailable) return res.status(404).send({ status: false, message: "No data found" });
+        if(wannaViewinvitationLetter){
+            getLetter = isAvailable.invitationLetter
+            return res.status(200).send({ status: true, message: "successful", data: getLetter })
+        }
+        if(wannaViewrequestingLetter){
+            getLetter = isAvailable.requestingLetter;
+            return res.status(200).send({ status: true, message: "successful", data: getLetter })
+        }
+        
 
-        return res.status(200).send({ status: true, message: "successfully ", data: isAvailable })
     } catch (error) {
         res.status(500).send({ status: false, message: error.message })
     }

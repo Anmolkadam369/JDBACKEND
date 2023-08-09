@@ -40,43 +40,43 @@ const registerAdministration = async (req, res)=>{
     if(typeof(departmentName) != "string")
       return res.status(400).send({status: false, message: "departmentName should be in String"});
     
-    let expectedValues = ["Adminstration","HR Department", "co Department","Membership Department", "wings Department", "Accounts Department", "publications", "Miscellaneous"];
+    // let expectedValues = ["Adminstration","HR Department", "co Department","Membership Department", "wings Department", "Accounts Department", "publications", "Miscellaneous"];
     
-   let answers = departmentName
-   console.log("answers ", answers)
-    let count = 0;
-    for(let i=0; i<expectedValues.length; i++){
-      console.log(expectedValues[i]);
-      if(expectedValues[i]==departmentName)
-        count++;
-    }
-    console.log("count ", count)
-    if(count != 1) return res.status(400).send({status:false, message:"please provide correct information 111111."});
-    let values = [];
-    if(departmentName == "Adminstration"){
-      values = [];
-    }
-    if(departmentName == "HR Department"){
-      values = [];
-    }
-    if(departmentName == "co Department"){
-      values = ["Billing","Document Checking","e-platform","Attestation"];
-    }
-    if(departmentName == "Membership Department"){
-      values = [];
-    }
-    if(departmentName == "wings Department"){
-      values = ["Recruit candidates", "Hire the right employees", "Conduct disciplinary actions","Update policies","Maintain employee records", "On Boarding New Employees" ];
-    }
-    if(departmentName == "Accounts Department"){
-      values = ["Tally","Payment Follow Up","Ledger","Billing"];
-    }
-    if(departmentName == "publications"){
-      values = ["Daily Newsletter","Weekly Newsletter","Quarterly Newsletter", "Designing"];
-    }
-    if(departmentName == "Miscellaneous"){
-      values = [];
-    }
+  //  let answers = departmentName
+  //  console.log("answers ", answers)
+  //   let count = 0;
+  //   for(let i=0; i<expectedValues.length; i++){
+  //     console.log(expectedValues[i]);
+  //     if(expectedValues[i]==departmentName)
+  //       count++;
+  //   }
+  //   console.log("count ", count)
+  //   if(count != 1) return res.status(400).send({status:false, message:"please provide correct information 111111."});
+  //   let values = [];
+    // if(departmentName == "Adminstration"){
+    //   values = [];
+    // }
+    // if(departmentName == "HR Department"){
+    //   values = [];
+    // }
+    // if(departmentName == "co Department"){
+    //   values = ["Billing","Document Checking","e-platform","Attestation"];
+    // }
+    // if(departmentName == "Membership Department"){
+    //   values = [];
+    // }
+    // if(departmentName == "wings Department"){
+    //   values = ["Recruit candidates", "Hire the right employees", "Conduct disciplinary actions","Update policies","Maintain employee records", "On Boarding New Employees" ];
+    // }
+    // if(departmentName == "Accounts Department"){
+    //   values = ["Tally","Payment Follow Up","Ledger","Billing"];
+    // }
+    // if(departmentName == "publications"){
+    //   values = ["Daily Newsletter","Weekly Newsletter","Quarterly Newsletter", "Designing"];
+    // }
+    // if(departmentName == "Miscellaneous"){
+    //   values = [];
+    // }
     //______________________________
 
     if(!officerName) 
@@ -152,10 +152,10 @@ const registerAdministration = async (req, res)=>{
 
     //______________________________
     
-    let logInTime = new Date().getDate() + "/" + new Date().getMonth() + "/" + new Date().getFullYear()
+    let logInTime = new Date().getFullYear() + "-" + new Date().getMonth() + "-" + new Date().getDate()
     registerAdministrationInfo.Date = logInTime;
-    console.log(values)
-    registerAdministrationInfo.tasks = values;
+    // console.log(values)
+    // registerAdministrationInfo.tasks = values;
           //registration of an employee his/her photo
     //registerAdministration.signature = req.image;
     //____________________
@@ -177,6 +177,8 @@ const registerAdministration = async (req, res)=>{
 const loginAdministration = async(req,res,next)=>{
   try{
     let loginData = req.body;
+    console.log("frontend Data :", loginData)
+
     let{email, password} = loginData;
     //________________________________________________________
     if (!email)
@@ -232,13 +234,13 @@ console.log("email", email)
         next()
             
       //__________________________________________________________________
-
-    return res.status(200).send({ status: true, message: `${isAdministrationExist.officerName} login successfully`, data: tokenInfo });
+      console.log("tokenInfo", tokenInfo)
+    return res.status(200).send({ status: true, message: `${isAdministrationExist.officerName} login successfully`, data:  isAdministrationExist});
 }
 catch(error){
   return res.status(500).send({status:false, message:error.message})
 }
-}
+} 
 
 
 const loginHR = async(req,res)=>{
@@ -300,7 +302,7 @@ console.log("email", email)
       
       //__________________________________________________________________
 
-    return res.status(200).send({ status: true, message: `${isAdministrationExist.officerName} login successfully`, data: tokenInfo });
+    return res.status(200).send({ status: true, message: `${isAdministrationExist.officerName} login successfully`, data: isAdministrationExist });
 }
 catch(error){
   return res.status(500).send({status:false, message:error.message})
@@ -353,7 +355,7 @@ const updateInfo = async (req,res)=>{
     let month = String(new Date().getMonth()+1)
     let year = new Date().getFullYear()
     console.log("month",month)
-    let registrationDate = `${dated}-${month}-${year}`;
+    let registrationDate = `${year}-${month}-${dated}`;
     date = updateEmployeeInfo.date = registrationDate;  
 
 
