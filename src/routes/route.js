@@ -9,6 +9,8 @@ const clientEmailController = require("../controllers/clients/clientEmailControl
 const clientGSTNoController = require("../controllers/clients/clientGSTNoController");
 const recomendationLetterController= require("../controllers/clients/recomendationletterController");
 const masterController = require("../controllers/master/masterController")
+const wingsController = require("../controllers/clients/wingsController")
+const memberShipServices = require("../controllers/memberShipServices");
 const auth = require("../middleware/auth");
 const aws = require("../middleware/aws")
 
@@ -29,6 +31,8 @@ router.get("/loginMaster", masterController.loginMaster);
 router.post("/registerAdmin",  adminController.registerAdmin);
 router.get("/loginAdmin", adminController.loginAdmin);
 router.get("/getAdminDetails", adminController.getAdminDetails)
+router.post("/filledByAdmin/:companyId",adminController.filledByAdmin)
+router.post("/adminApprovedRequest/:changePasswordId",adminController.adminApprovedRequest);
 
 //SUPERADMIN
 router.post("/registerSuperAdmin",  superAdminController.registerSuperAdmin);
@@ -43,9 +47,9 @@ router.get("/getMyaccount/:employeeId", auth.authentication,administrationContro
 router.put("/updateInfo/:paramsId", administrationController.updateInfo);
 // router.delete("/deleteEmployee/:employeeId", administrationController.deleteEmployee);
 
-//          NOT DONE YET
-// router.post ("/administration/forgotPassword", administrationController.forgotPasword)
-// router.post ("administration/resetPassword", administrationController.resetPassword)
+// NOT DONE YET
+router.post ("/administration/forgotPassword", administrationController.forgotPasword)
+router.get ("/administration/resetPassword/:token", administrationController.resetPassword)
 
 // JD 
 //for first Time clicking
@@ -74,8 +78,10 @@ router.post("/createClient", clientController.createClient);
 router.get("/loginClient", clientController.loginClient);
 router.get("/getCompanyDetails/clientId",clientController.getCompanyDetails);
 router.get("getpersonalinfo/:clientId",clientController.getClientPersonalInfo);
-router.put("/changePassword/:clientId",clientController.changePassword);
+router.post("/changePassword/:clientId",clientController.changePassword);
 router.post("/commercialDir/:id" ,clientController.commercialDir);
+router.put("/updateCompanyDetails/:clientId", clientController.updateCompanyDetails);
+router.put("/updatePersonalDetalis/:clientId", clientController.updatePersonalDetails);
 
 
 //clientEmail
@@ -89,8 +95,24 @@ router.post("/createRecommendationLetter/:companyId",recomendationLetterControll
 router.get("/viewData/:id", recomendationLetterController.viewData);
 router.put("/updateData/:id", recomendationLetterController.updateData);
 
-router.all("*/", async(req,res)=>{
-    return res.status(400).send({status: false, message:"invalid path"})
-})
+// router.all("*/", async(req,res)=>{
+    // return res.status(400).send({status: false, message:"invalid path"})
+// })
 
+//WINGS
+router.post("/createExportWing/:companyId", wingsController.createExportWing);
+router.post("/captcha",wingsController.captcha);
+router.post("/verify", wingsController.verify);
+router.get("/previewData/:wingsId",wingsController.previewData);
+router.post("/getTickectNo/:wingsId", wingsController.generateTicketNo)
+router.post("/sendMail/:companyId/:wingsId",wingsController.sendingMailToUser)
+
+
+//MEMBER SHIP SERVICES
+router.post("/membershipservices/:clientId", memberShipServices.memberShipServices)
+
+
+
+const payment = require('../controllers/practice');
+// router.post('/create-payment-intent', payment.createPaymentIntent)
 module.exports = router;

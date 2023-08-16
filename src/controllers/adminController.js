@@ -1,7 +1,10 @@
 const mongoose = require('mongoose')
 const adminModel = require("../models/adminModel");
+const clientModel = require("../models/clients/clientModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt')
+const clientPasswordChangeModel = require('../models/clients/clientPasswordChangeModel');
+
 //const validation = require("../validations/validation");
 const registerAdmin = async ( req, res) =>{
   try{
@@ -127,5 +130,73 @@ const getAdminDetails = async (req,res)=>{
   }
 }
 
-module.exports = {registerAdmin,loginAdmin,getAdminDetails};
+const getCompanyDetailsForAdmin = async (req, res) => {
+  try {
+      let companyId = req.params;
+      if (!clientId) return res.status(400).send({ status: false, message: "Please Enter clientId value" });
+      let clientCompanyDetails = await clientModel.findById(clientId);
+      if (!clientCompanyDetails) return res.status(404).send({ status: false, message: "No data found" });
+     
+      
+      return res.status(200).send({ status: true, message: "here's company Details", data: clientCompanyDetails });
+  }
+  catch (error) {
+      return res.status(500).send({ status: false, message: error.message })
+  }
+}
+
+const filledByAdmin = async (req, res)=>{
+  try {
+    let companyId = req.params.companyId;
+    let data = req.body;
+    let {memberShipNo, validUpTo, approved, reasonForNotchoosing}=data;
+      
+      if(!memberShipNo) return res.status(400).send({ status: false, message: "please fill membership no"});
+      memberShipNo = data.memberShipNo= memberShipNo;
+     
+      if(!validUpTo) return res.status(400).send({ status: false, message: "please fill validUpTo"});
+      validUpTo = data.validUpTo= validUpTo;
+
+      if(!approved) return res.status(400).send({ status: false, message: "please fill approved"});
+      approved = data.approved= approved;
+
+      if(approved === false && !reasonForNotchoosing) return res.status(400).send({ status: false, message: "please put reason"});
+      reasonForNotchoosing = data.reasonForNotchoosing= reasonForNotchoosing;
+
+      if (!companyId) return res.status(400).send({ status: false, message: "Please Enter companyId value" });
+      let clientCompanyDetails = await clientModel.findOneAndUpdate({_id:companyId},{$set:{memberShipNo:memberShipNo, validUpTo:validUpTo, approved:approved,reasonForNotchoosing:reasonForNotchoosing}},{new:true});
+      if (!clientCompanyDetails) return res.status(404).send({ status: false, message: "No data found" });
+      return res.status(200).send({ status: true, message: "Data updated successfully", data: clientCompanyDetails });
+      
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message })
+  }
+}
+
+const partiallyApproved = async (req,res)=>{
+  try {
+    let partiallyApproved = req.body;
+    if(partiallyApproved === false) return res.status(400).send({status:false, message:"not approved"});
+    // we are sending Email to the user 
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message })
+  }
+}
+
+
+
+//change password request
+const adminApprovedRequest = async (req, res) => {
+  let id = req.params.changePasswordId;
+  let data = req.body.approved;
+  if(data === false) return res.status(400).send({ status: false, message: "no password change" }) 
+  let changePasswordInfo = await clientPasswordChangeModel.findById(id);
+  if (!changePasswordInfo) return res.status(404).send({ status: false, message: "document doesn't exists " })
+  let email = changePasswordInfo.email;
+  let isClientExists = await clientModel.findOneAndUpdate({ email: email },{$set:{password:changePasswordInfo.newPassword, confirmPassword: changePasswordInfo.confirmPassword}},{new:true});
+  if (!isClientExists) return res.status(404).send({ status: false, message: "Email doesn't exists " })
+  return res.status(200).send({ status: false, message: "changed password" })
+  }
+
+module.exports = {registerAdmin,loginAdmin,getAdminDetails,getCompanyDetailsForAdmin, filledByAdmin,adminApprovedRequest};
   

@@ -116,5 +116,37 @@ const loginSuperAdmin = async(req,res)=>{
   }
 }
 
-module.exports = {registerSuperAdmin, loginSuperAdmin};
+const getCompanyDetailsForsuperAdmin = async (req, res) => {
+  try {
+      let clientId = req.params;
+      if (!clientId) return res.status(400).send({ status: false, message: "Please Enter clientId value" });
+      let clientCompanyDetails = await clientModel.findById(clientId);
+      if (!clientCompanyDetails) return res.status(404).send({ status: false, message: "No data found" });
+     
+      
+      return res.status(200).send({ status: true, message: "here's company Details", data: clientCompanyDetails });
+  }
+  catch (error) {
+      return res.status(500).send({ status: false, message: error.message })
+  }
+}
+
+const filledBysuperAdmin = async (req, res)=>{
+  try {
+    let clientId = req.params;
+    let data = req.body;
+    let {approvedBySuperAdmin}=data;
+      
+      if(approvedBySuperAdmin){
+       approvedBySuperAdmin  = data.approvedBySuperAdmin = approvedBySuperAdmin ;
+      if (!clientId) return res.status(400).send({ status: false, message: "Please Enter clientId value" });
+      let clientCompanyDetails = await clientModel.findOneAndUpdate({_id:clientId},{$set:{approvedBySuperAdmin:approvedBySuperAdmin}},{new:true});
+      if (!clientCompanyDetails) return res.status(404).send({ status: false, message: "No data found" });
+      return res.status(200).send({ status: true, message: "Data updated successfully", data: clientCompanyDetails });
+      }
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message })
+  }
+}
+module.exports = {registerSuperAdmin, loginSuperAdmin,getCompanyDetailsForsuperAdmin,filledBysuperAdmin};
   

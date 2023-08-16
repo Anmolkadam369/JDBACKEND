@@ -1,131 +1,170 @@
 const mongoose = require('mongoose')
 
 const clientSchema = new mongoose.Schema({
-    "selectMembership":{
+    
+    selectMembership:{
         type:String,
         required:true,
         trim : true
     },
-    "companyName":{
+    companyName:{
         type:String,
         required:true,
         trim : true
     },
-    "GSTNo":{
+    GSTNo:{
         type:String,
         required:true,
         trim : true
     },
-    "IECNo":{
+    IECNo:{
         type:String,
         required:true,
         trim : true
     },
-    "websiteAdd":{
+    numberOfEmployees:{
+        type:String,
+        trim:true
+    },
+    websiteAdd:{
         type:String,
         required:true,
         trim : true
     },
-    "address1":{
+    address1:{
         type:String,
         required:true,
         trim : true
     },
-    "address2":{
+    address2:{
         type:String,
         required:true,
         trim : true
     },
-    "address3":{
+    address3:{
         type:String,
         trim : true
     },
-    "address4":{
+    address4:{
         type:String,
         trim : true
     },
-    "country":{
-        type:String,
-        required:true,
-        trim : true
-    },
-    "state":{
+    country:{
         type:String,
         required:true,
         trim : true
     },
-    "pinCode":{
+    state:{
+        type:String,
+        required:true,
+        trim : true
+    },
+    pinCode:{
         type:Number,
         required:true,
         trim : true
     },
-    "businessCategory":{
+    businessCategory:{
         type:String,
         required:true,
         trim : true
     },
-    "howDidYouKnowAboutUs":{
+    howDidYouKnowAboutUs:{
         type:String,
         // required:true,
         trim : true
     },
-    "title":{
+    title:{
         type:String,
         required:true,
         trim : true
     },
-    "firstName":{
+    firstName:{
         type:String,
         required:true,
         trim : true
     },
-    "surName":{
+    surName:{
         type:String,
         // required:true,
         trim : true
     },
-    "role":{
+    role:{
         type:String,
         required:true,
         trim : true
     },
-    "email":{
+    email:{
         type:String,
         required:true,
         trim : true
     },
-    "password":{
+    password:{
         type:String,
         required:true,
         trim : true
     },
-    "confirmPassword":{
+    confirmPassword:{
         type:String,
         required:true,
         trim : true
     },
-    "telephoneNo":{
+    telephoneNo:{
+        type:String,
+        // required:true,
+        trim : true
+    },
+    phoneNo:{
         type:Number,
         required:true,
         trim : true
     },
-    "phoneNo":{
-        type:Number,
-        required:true,
-        trim : true
-    },
-    "registeredBank":{
+    registeredBank:{
         type:String,
         required:true,
         trim : true
     },
-    "branchDetails":{
+    branchDetails:{
         type:{
             registeredAccountNo : String,
             branchName : String
         },
         required:true,
         trim : true
+    },
+    modeOfCommunication:{
+        type: [],
+        trim:true
+    },
+    facebook:{
+        type:String,
+        trim:true
+    },  
+    twitter:{
+        type:String,
+        trim:true
+    },
+    linkedIn:{
+        type:String,
+        trim:true
+    },
+    memberShipNo:{
+        type:String,
+        trim :true
+    },
+    validUpTo:{
+        type:String,
+        trim :true
+    },
+    approved:{
+        type:Boolean
+    },
+    reasonForNotchoosing:{
+        type:String,
+        trim :true
+    },
+    approvedBySuperAdmin:{
+        type:Boolean
     }
 },{timestamps:true});
 

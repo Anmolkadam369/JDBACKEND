@@ -173,7 +173,6 @@ const registerAdministration = async (req, res)=>{
 }
 }
 
-
 const loginAdministration = async(req,res,next)=>{
   try{
     let loginData = req.body;
@@ -242,7 +241,6 @@ catch(error){
 }
 } 
 
-
 const loginHR = async(req,res)=>{
   try{
     let loginData = req.body;
@@ -302,16 +300,12 @@ console.log("email", email)
       
       //__________________________________________________________________
 
-    return res.status(200).send({ status: true, message: `${isAdministrationExist.officerName} login successfully`, data: isAdministrationExist });
+    return res.status(200).send({ status: true, message: `${isAdministrationExist.officerName} login successfully`, data: isAdministrationExis });
 }
 catch(error){
   return res.status(500).send({status:false, message:error.message})
 }
 }
-
-
-
-
 
 const getMyaccount = async (req,res)=>{
   const employeeId = req.params.employeeId;
@@ -485,26 +479,24 @@ const updateInfo = async (req,res)=>{
   }
 }
 
-
 // Create a transporter
 const transporter = nodemailer.createTransport({
   service: 'Gmail', // e.g., 'Gmail'
   auth: {
-    user: "developeraecci@gmail.com",
-    pass: "WD0996##"
+    user: "anmolkadam369@gmail.com",
+    pass: "dunzxalyusfeqaci"
   }
 });
 
 // Function to send forgot password email
 const sendForgotPasswordEmail = (email, token) => {
-  console.log("problem",process.env.some_some)
-  console.log("problem",process.env.EMAIL_USER)
+
 
   const mailOptions = {
-    from: process.env.EMAIL_USER, // Your email address
+    from: 'anmolkadam369@gmail.com', // Your email address
     to: email,
     subject: 'Password Reset',
-    text: `Click the link to reset your password: http://localhost:3000/administration/resetPasword/${token}`
+    text: `Click the link to reset your password: http://localhost:3001/administration/resetPasword/${token}`
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -516,8 +508,8 @@ const sendForgotPasswordEmail = (email, token) => {
   });
 };
 
-const forgotPasword =async (req, res) => {
-  const forgotPassword = req.body.email;
+const  forgotPasword =async (req, res) => {
+  let forgotPassword = req.body;
   let {email,resetToken,resetTokenExpires} = forgotPassword;
   // Find forgotPassword by email (you should replace this with your database query)
   const foundforgotPassword = administrationModel.findOne({emailId: email});
@@ -536,7 +528,8 @@ const forgotPasword =async (req, res) => {
   resetTokenExpires = forgotPassword.resetTokenExpires = Date.now() + 3600000; // Token expires in 1 hour
   console.log("resetTokenExpires:",resetTokenExpires)
   console.log("forgotPassword:      ", forgotPassword)
-
+  let allInfo = await forgotPasswordModel.create(forgotPassword);
+  res.status(200).send({status:true, message:allInfo})
   sendForgotPasswordEmail(email,token)
 };
 
@@ -544,7 +537,7 @@ const resetPassword = (req, res) => {
   const { token, newPassword } = req.body;
 
   // Find user by reset token and check expiration
-  const user = users.find(u => u.resetToken === token && u.resetTokenExpires > Date.now());
+  const user = forgotPasswordModel.find(u => u.resetToken === token && u.resetTokenExpires > Date.now());
 
   if (!user) {
     return res.status(400).json({ message: 'Invalid or expired token' });
@@ -573,6 +566,6 @@ const resetPassword = (req, res) => {
 //   }
 // }
 
-module.exports = {registerAdministration,loginAdministration,loginHR,getMyaccount,getWantedAdministrationList, updateInfo, forgotPasword /*deleteEmployee*/ }
+module.exports = {registerAdministration,loginAdministration,loginHR,getMyaccount,getWantedAdministrationList, updateInfo, forgotPasword ,resetPassword/*deleteEmployee*/ }
 
 
