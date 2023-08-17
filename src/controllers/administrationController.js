@@ -5,19 +5,24 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
 const employeeJdModel = require("../models/employeeJdModel");
 const nodemailer = require('nodemailer');
-const crypto = require("crypto")
-require('dotenv').config();
-const forgotPasswordModel = require("../models/forgotPasswordModel")
 
-// const validation = require("../validations/validation");
+
+function generateRandomString(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    result += characters.charAt(randomIndex);
+  }
+  return result;
+}
+
 const registerAdministration = async (req, res)=>{
   try{
     let registerAdministrationInfo = req.body;
-    let {profileImage,departmentName,officerName,employeeId,emailId,userName,password,designation,date,signature} = registerAdministrationInfo;
-      //registration of an employee his/her photo
-    //registerAdministration.profileImage = req.image;
-    
-    
+    let {administrationId, profileImage,departmentName,officerName,employeeId,emailId,userName,password,designation,date,signature} = registerAdministrationInfo;
+
+administrationId = registerAdministrationInfo.administrationId = "emp_"+generateRandomString(10); 
     //_______________________________Extarnal Data_________________________________________________
     
     profileImage = registerAdministrationInfo.profileImage = req.image;
@@ -234,7 +239,7 @@ console.log("email", email)
             
       //__________________________________________________________________
       console.log("tokenInfo", tokenInfo)
-    return res.status(200).send({ status: true, message: `${isAdministrationExist.officerName} login successfully`, data:  isAdministrationExist});
+    return res.status(200).send({ status: true, message: `${isAdministrationExist.officerName} login successfully`, data:  isAdministrationExist, tokenInfo: tokenInfo});
 }
 catch(error){
   return res.status(500).send({status:false, message:error.message})
@@ -479,79 +484,6 @@ const updateInfo = async (req,res)=>{
   }
 }
 
-// Create a transporter
-const transporter = nodemailer.createTransport({
-  service: 'Gmail', // e.g., 'Gmail'
-  auth: {
-    user: "anmolkadam369@gmail.com",
-    pass: "dunzxalyusfeqaci"
-  }
-});
-
-// Function to send forgot password email
-const sendForgotPasswordEmail = (email, token) => {
-
-
-  const mailOptions = {
-    from: 'anmolkadam369@gmail.com', // Your email address
-    to: email,
-    subject: 'Password Reset',
-    text: `Click the link to reset your password: http://localhost:3001/administration/resetPasword/${token}`
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log('Error sending email:', error);
-    } else {
-      console.log('Email sent:', info.response);
-    }
-  });
-};
-
-const  forgotPasword =async (req, res) => {
-  let forgotPassword = req.body;
-  let {email,resetToken,resetTokenExpires} = forgotPassword;
-  // Find forgotPassword by email (you should replace this with your database query)
-  const foundforgotPassword = administrationModel.findOne({emailId: email});
-  if (!foundforgotPassword) {
-    return res.status(404).json({ message: 'user not found' });
-  }
-
-  // Generate and store reset token
-  const token = crypto.randomBytes(20).toString('hex');
-  console.log("token:",token)
-
-  email=forgotPassword.email = email;
-  resetToken = forgotPassword.resetToken = token;
-  console.log("resetToken:",resetToken)
-
-  resetTokenExpires = forgotPassword.resetTokenExpires = Date.now() + 3600000; // Token expires in 1 hour
-  console.log("resetTokenExpires:",resetTokenExpires)
-  console.log("forgotPassword:      ", forgotPassword)
-  let allInfo = await forgotPasswordModel.create(forgotPassword);
-  res.status(200).send({status:true, message:allInfo})
-  sendForgotPasswordEmail(email,token)
-};
-
-const resetPassword = (req, res) => {
-  const { token, newPassword } = req.body;
-
-  // Find user by reset token and check expiration
-  const user = forgotPasswordModel.find(u => u.resetToken === token && u.resetTokenExpires > Date.now());
-
-  if (!user) {
-    return res.status(400).json({ message: 'Invalid or expired token' });
-  }
-
-  // Update user's password (you should hash the password)
-  user.password = newPassword;
-  user.resetToken = null;
-  user.resetTokenExpires = null;
-
-  return res.json({ message: 'Password reset successful' });
-}
-
-
 
 
 // const deleteEmployee = async (req, res)=>{
@@ -566,6 +498,6 @@ const resetPassword = (req, res) => {
 //   }
 // }
 
-module.exports = {registerAdministration,loginAdministration,loginHR,getMyaccount,getWantedAdministrationList, updateInfo, forgotPasword ,resetPassword/*deleteEmployee*/ }
+module.exports = {registerAdministration,loginAdministration,loginHR,getMyaccount,getWantedAdministrationList, updateInfo,/*deleteEmployee*/ }
 
 

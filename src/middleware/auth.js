@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const administrationModel = require('../models/administrationModel');
+let {ObjectId} = require('mongodb')
 
 
 
@@ -21,6 +22,7 @@ const authentication =  (req, res, next) => {
             // add krdo role bhi
 
             req.administrationId = decoded.administrationId;
+            console.log(req.administrationId)
             next();
         });
     } catch (error) {
@@ -35,8 +37,7 @@ const authorization = async (req, res, next) => {
 
         // Check if paramUserId is provided and is a valid ObjectId
         if (paramUserId) {
-
-            let userData = await administrationModel.findById(paramUserId);
+            let userData = await administrationModel.findOne({administrationId : paramUserId});
             console.log(userData)
 
             // If the user with the provided userId does not exist
@@ -46,14 +47,14 @@ const authorization = async (req, res, next) => {
             if(userData.emailId == "hr@aecci.org.in")
             return res.status(400).send({ status: false, message: "You cannot create JD" });
                 
-
             // If the userId in the request parameters is not the same as the userId from the token
-            if (paramUserId !== tokenId) {
+            if (userData._id.toString() !== tokenId) {
                 return res.status(403).send({ status: false, message: "Unauthorized User Access" });
             }
 
         }
         req.employeeID = paramUserId;
+        console.log("DONE")
         // If paramUserId is not provided , allow access
         next();
 
@@ -71,7 +72,7 @@ const authorizationForHr = async (req, res, next) => {
         // Check if paramUserId is provided and is a valid ObjectId
         if (paramUserId) {
 
-            let userData = await administrationModel.findById(paramUserId);
+            let userData = await administrationModel.findOne({administrationId : paramUserId});
             console.log(userData)
 
             // If the user with the provided userId does not exist
@@ -83,7 +84,7 @@ const authorizationForHr = async (req, res, next) => {
                 
             console.log(paramUserId , " ", tokenId)
             // If the userId in the request parameters is not the same as the userId from the token
-            if (paramUserId !== tokenId) {
+            if (userData._id.toString() !== tokenId) {
                 return res.status(403).send({ status: false, message: "Unauthorized User Access" });
             }
 
