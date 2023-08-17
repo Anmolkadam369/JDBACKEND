@@ -236,8 +236,8 @@ console.log("email", email)
     res.setHeader('x-api-key', token)
         //__________________________________________________________________
 
-        // if(isAdministrationExist.emailId == "hr@aecci.org.in")
-        // next()
+        if(isAdministrationExist.emailId == "hr@aecci.org.in")
+        next()
             
       //__________________________________________________________________
       console.log("tokenInfo", tokenInfo)
@@ -307,7 +307,7 @@ console.log("email", email)
       
       //__________________________________________________________________
 
-    return res.status(200).send({ status: true, message: `${isAdministrationExist.officerName} login successfully`, data: isAdministrationExis });
+    return res.status(200).send({ status: true, message: `${isAdministrationExist.officerName} login successfully`, data: isAdministrationExist, tokenInfo:tokenInfo });
 }
 catch(error){
   return res.status(500).send({status:false, message:error.message})
