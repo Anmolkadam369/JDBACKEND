@@ -5,7 +5,9 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
 const employeeJdModel = require("../models/employeeJdModel");
 const nodemailer = require('nodemailer');
-
+const crypto = require("crypto")
+require('dotenv').config();
+const forgotPasswordModel = require("../models/forgotPasswordModel")
 
 function generateRandomString(length) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -234,8 +236,8 @@ console.log("email", email)
     res.setHeader('x-api-key', token)
         //__________________________________________________________________
 
-        if(isAdministrationExist.emailId == "hr@aecci.org.in")
-        next()
+        // if(isAdministrationExist.emailId == "hr@aecci.org.in")
+        // next()
             
       //__________________________________________________________________
       console.log("tokenInfo", tokenInfo)
@@ -310,6 +312,20 @@ console.log("email", email)
 catch(error){
   return res.status(500).send({status:false, message:error.message})
 }
+}
+
+const getEmpData = async(req,res)=>{
+  try {
+    const employeeId = req.params.employeeId;
+    console.log(employeeId)
+     
+    let getInfo = await administrationModel.find();
+    console.log(getInfo)
+    if(!getInfo)return res.status(400).send({status: false, message:"No user Found"})
+  res.status(200).send({status:true, message: "employees information ", data : getInfo })
+  } catch (error) {
+    return res.status(500).send({status:false, message:error.message})
+  }
 }
 
 const getMyaccount = async (req,res)=>{
@@ -484,6 +500,74 @@ const updateInfo = async (req,res)=>{
   }
 }
 
+const transporter = nodemailer.createTransport({
+  service: 'Gmail', // e.g., 'Gmail'
+  auth: {
+    user: "anmolkadam369@gmail.com",
+    pass: "xapeupenirhdxtgt"
+  }
+});
+
+// Function to send forgot password email
+const sendForgotPasswordEmail = (email, token) => {
+
+
+  const mailOptions = {
+    from: 'anmolkadam369@gmail.com', // Your email address
+    to: email,
+    subject: 'Password Reset',
+    text: `Click the link to reset your password: http://localhost:3001/administration/resetPasword/${token}`
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log('Error sending email:', error);
+    } else {
+      console.log('Email sent:', info.response);
+    }
+  });
+};
+
+const  forgotPasword =async (req, res) => {
+  let forgotPassword = req.body;
+  let {email,resetToken,resetTokenExpires} = forgotPassword;
+  // Find forgotPassword by email (you should replace this with your database query)
+  const foundforgotPassword = administrationModel.findOne({emailId: email});
+  if (!foundforgotPassword) {
+    return res.status(404).json({ message: 'user not found' });
+  }
+
+  // Generate and store reset token
+  const token = crypto.randomBytes(20).toString('hex');
+  console.log("token:",token)
+
+  email=forgotPassword.email = email;
+  resetToken = forgotPassword.resetToken = token;
+  console.log("resetToken:",resetToken)
+
+  resetTokenExpires = forgotPassword.resetTokenExpires = Date.now() + 36000; // Token expires in 1 hour
+  console.log("resetTokenExpires:",resetTokenExpires)
+  console.log("forgotPassword:      ", forgotPassword)
+  let allInfo = await forgotPasswordModel.create(forgotPassword);
+  res.status(200).send({status:true, message:allInfo})
+  sendForgotPasswordEmail(email,token)
+};
+
+const resetPassword =async (req, res) => {
+  let data = req.body;
+  let { token, newPassword } = data;
+  console.log("some")
+
+  const user =await forgotPasswordModel.findOne({resetToken:token});
+  if (!user) return res.status(400).send({status:false, message: 'Invalid token' });
+  if(user.resetTokenExpires < Date.now()) return res.status(400).send({status:false, message: 'token expired'  });
+  let hashing = bcrypt.hashSync(newPassword, 10);
+  newPassword=data.newPassword = hashing; 
+
+  await administrationModel.findOneAndUpdate({emailId:user.email},{$set:{password:newPassword}},{new:true});
+
+  return res.json({ message: 'Password reset successful' });
+}
 
 
 // const deleteEmployee = async (req, res)=>{
@@ -498,6 +582,6 @@ const updateInfo = async (req,res)=>{
 //   }
 // }
 
-module.exports = {registerAdministration,loginAdministration,loginHR,getMyaccount,getWantedAdministrationList, updateInfo,/*deleteEmployee*/ }
+module.exports = {registerAdministration,loginAdministration,loginHR,getMyaccount,getEmpData,getWantedAdministrationList, updateInfo,forgotPasword,resetPassword/*deleteEmployee*/ }
 
 
