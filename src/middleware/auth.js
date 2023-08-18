@@ -73,7 +73,7 @@ const authorizationForHr = async (req, res, next) => {
         if (paramUserId) {
 
             let userData = await administrationModel.findOne({administrationId : paramUserId});
-            console.log(userData)
+            console.log("userDATA",userData)
 
             // If the user with the provided userId does not exist
             if (!userData) {

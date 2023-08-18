@@ -14,7 +14,6 @@ router.post("/registerAdministration",aws.awsLinkEmployeeProfile,aws.awsLinkEmpl
 router.post("/loginAdministration", administrationController.loginAdministration)
 router.post("/loginHR", administrationController.loginHR)
 router.get("/getMyaccount/:employeeId", auth.authentication,administrationController.getMyaccount);
-router.put("/updateInfo/:paramsId", administrationController.updateInfo);
 router.post ("/administration/forgotPassword", administrationController.forgotPasword)
 router.get ("/administration/resetPassword/:token", administrationController.resetPassword)
 
@@ -28,10 +27,13 @@ router.post("/thirtyMin/:employeeId/:jdId",auth.authentication,auth.authorizatio
 router.post("/fifteenMin/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.fifteenMinTimesUp);
 
 //HR 
-router.get("/getAllEmpData/:emplyeeId",auth.authentication,auth.authorizationForHr,administrationController.getEmpData);
+router.get("/getAllEmpData/:employeeId",auth.authentication,auth.authorizationForHr,administrationController.getEmpData);
+router.put("/updateInfo/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr, administrationController.updateInfo);
 router.post("/extendedTime/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,employeeJdController.extendTime);
 router.get("/getWantedAdministrationList/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,employeeJdController.getWantedAdministrationList);
 router.get("/getWantedListByDate/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,employeeJdController.getWantedListByDate)
+router.delete("/deleteEmp/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,administrationController.deleteEmployee)
+
 
 router.all("*/", async(req,res)=>{
     return res.status(404).send({status: false, message:"invalid path"})

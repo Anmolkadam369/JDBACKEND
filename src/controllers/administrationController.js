@@ -232,6 +232,8 @@ console.log("email", email)
       {administrationId : isAdministrationExist._id,  exp: Math.floor(Date.now() / 1000) + 86400}, "aeccisecurity");
      let tokenInfo = { userId: isAdministrationExist._id, token: token };
      console.log(tokenInfo);
+    tokenInfo = bcrypt.hashSync(tokenInfo, 10);
+    console.log(tokenInfo,"hey");
 
     res.setHeader('x-api-key', token)
         //__________________________________________________________________
@@ -299,6 +301,8 @@ console.log("email", email)
       {administrationId : isAdministrationExist._id,  exp: Math.floor(Date.now() / 1000) + 86400}, "aeccisecurity");
      let tokenInfo = { userId: isAdministrationExist._id, token: token };
      console.log(tokenInfo);
+    //  tokenInfo = bcrypt.hashSync(tokenInfo, 10);
+    //  console.log(tokenInfo,"hey");
 
     res.setHeader('x-api-key', token)
         //__________________________________________________________________
@@ -319,7 +323,7 @@ const getEmpData = async(req,res)=>{
     const employeeId = req.params.employeeId;
     console.log(employeeId)
      
-    let getInfo = await administrationModel.find();
+    let getInfo = await administrationModel.find({isDeleted:false});
     console.log(getInfo)
     if(!getInfo)return res.status(400).send({status: false, message:"No user Found"})
   res.status(200).send({status:true, message: "employees information ", data : getInfo })
@@ -352,7 +356,7 @@ const getWantedAdministrationList = async (req,res)=>{
 const updateInfo = async (req,res)=>{
      try{
       let values=[];
-       let paramsId = req.params.paramsId;
+       let empId = req.params.normalEmployee;
     let updateEmployeeInfo = req.body;
     let {profileImage,departmentName,officerName,userName,password,date,signature,employeeId,tasks, emailId,designation} = updateEmployeeInfo;
       //registration of an employee his/her photo
@@ -381,43 +385,6 @@ const updateInfo = async (req,res)=>{
 
     if(typeof(departmentName) != "string")
       return res.status(400).send({status: false, message: "departmentName should be in String"});
-    
-    let expectedValues = ["Adminstration", "co Department","Membership Department", "wings Department", "Accounts Department", "publications", "Miscellaneous"];
-    
-   let answers = departmentName
-   console.log("answers ", answers)
-    let count = 0;
-    for(let i=0; i<expectedValues.length; i++){
-      console.log(expectedValues[i]);
-      if(expectedValues[i]==departmentName)
-        count++;
-    }
-    console.log("count ", count)
-    if(count != 1) return res.status(400).send({status:false, message:"please provide correct information 111111."});
-   
-    if(departmentName == "Adminstration"){
-      values = [];
-    }
-    if(departmentName == "co Department"){
-      values = ["Billing","Document Checking","e-platform","Attestation"];
-    }
-    if(departmentName == "Membership Department"){
-      values = [];
-    }
-    if(departmentName == "wings Department"){
-      values = ["Recruit candidates", "Hire the right employees", "Conduct disciplinary actions","Update policies","Maintain employee records", "On Boarding New Employees" ];
-    }
-    if(departmentName == "Accounts Department"){
-      values = ["Tally","Payment Follow Up","Ledger","Billing"];
-    }
-    if(departmentName == "publications"){
-      values = ["Daily Newsletter","Weekly Newsletter","Quarterly Newsletter", "Designing"];
-    }
-    if(departmentName == "Miscellaneous"){
-      values = [];
-    }
-    }
-    //______________________________
 
     if(officerName){ 
 
@@ -486,15 +453,16 @@ const updateInfo = async (req,res)=>{
     }
 
     //______________________________
-    console.log("values :", values)
-    tasks = updateEmployeeInfo.tasks = values;
+    // console.log("values :", values)
+    // tasks = updateEmployeeInfo.tasks = values;
           //registration of an employee his/her photo
-    //registerAdministration.signature = req.image;
+    // registerAdministration.signature = req.image;
     //____________________
-    let updatedEmployee = await administrationModel.findOneAndUpdate({paramsId : employeeId}, {$set:{profileImage:profileImage, departmentName:departmentName, officerName:officerName, employeeId:employeeId,emailId:emailId, designation:designation, userName:userName, password:password, tasks:tasks}}, {new:true});
+    let updatedEmployee = await administrationModel.findOneAndUpdate({administrationId : empId, isDeleted:false}, {$set:{profileImage:profileImage, departmentName:departmentName, officerName:officerName, employeeId:employeeId,emailId:emailId, designation:designation, userName:userName, password:password, tasks:tasks}}, {new:true});
        
     return res.status(200).send({status:true, message: "user Upadated", data : updatedEmployee})
   }
+}
    catch (error) {
          return res.status(500).send({ status: false, message: error.message })
   }
@@ -516,7 +484,7 @@ const sendForgotPasswordEmail = (email, token) => {
     from: 'anmolkadam369@gmail.com', // Your email address
     to: email,
     subject: 'Password Reset',
-    text: `Click the link to reset your password: http://localhost:3001/administration/resetPasword/${token}`
+    text: `Click the link to reset your password: http://localhost:3001/administration/resetPassword/${token}`
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -545,22 +513,25 @@ const  forgotPasword =async (req, res) => {
   resetToken = forgotPassword.resetToken = token;
   console.log("resetToken:",resetToken)
 
-  resetTokenExpires = forgotPassword.resetTokenExpires = Date.now() + 36000; // Token expires in 1 hour
+  resetTokenExpires = forgotPassword.resetTokenExpires = Date.now() + 6000000; // Token expires in 1 hour
   console.log("resetTokenExpires:",resetTokenExpires)
   console.log("forgotPassword:      ", forgotPassword)
   let allInfo = await forgotPasswordModel.create(forgotPassword);
   res.status(200).send({status:true, message:allInfo})
+  req.token = token;
+  console.log(req.token)
   sendForgotPasswordEmail(email,token)
 };
 
 const resetPassword =async (req, res) => {
-  let data = req.body;
-  let { token, newPassword } = data;
-  console.log("some")
 
+  let data = req.body;
+  let { newPassword } = data;
+  let token = req.params.token;
   const user =await forgotPasswordModel.findOne({resetToken:token});
-  if (!user) return res.status(400).send({status:false, message: 'Invalid token' });
-  if(user.resetTokenExpires < Date.now()) return res.status(400).send({status:false, message: 'token expired'  });
+  console.log(user)
+  // if (!user) return res.status(400).send({status:false, message: 'Invalid token' });
+  if(user.resetTokenExpires < Date.now()) return res.status(400).send({status:false, message: 'Token expired'  });
   let hashing = bcrypt.hashSync(newPassword, 10);
   newPassword=data.newPassword = hashing; 
 
@@ -570,18 +541,20 @@ const resetPassword =async (req, res) => {
 }
 
 
-// const deleteEmployee = async (req, res)=>{
-//   try {
-//     const empolyeeId = req.params.empolyeeId;
+const deleteEmployee = async (req, res)=>{
+  try {
+    const empolyeeId = req.params.normalEmployee;
+    let isEmployeeExist = await administrationModel.findOne({administrationId : empolyeeId});
+    if(!isEmployeeExist) return res.status(404).send({ status: false, message: "Employee doesn't exists"});
+    if(isEmployeeExist.isDeleted == true) return res.status(400).send({ status: false, message: "Employee is Already Deleted"});
+      let getInfo = await administrationModel.findOneAndUpdate({administrationId : empolyeeId, isDeleted:false },{$set:{isDeleted:true, deletedAt : Date.now()}},{new:true});
+     console.log(getInfo)
+      return res.status(200).send({ status: true, message: "success", message: "deleted successfully " , data: getInfo})
+  } catch (error) {
+     return res.status(500).send({ status: false, message: error.message })
+  }
+}
 
-//       let getInfo = await administrationModel.findOneAndUpdate({employeeId : empolyeeId, isDeleted:false },{$set:{isDeleted:true, deletedAt : Date.now()}},{new:true});
-//      console.log(getInfo)
-//       return res.status(200).send({ status: true, message: "success", message: "deleted successfully " , data: getInfo})
-//   } catch (error) {
-//      return res.status(500).send({ status: false, message: error.message })
-//   }
-// }
-
-module.exports = {registerAdministration,loginAdministration,loginHR,getMyaccount,getEmpData,getWantedAdministrationList, updateInfo,forgotPasword,resetPassword/*deleteEmployee*/ }
+module.exports = {registerAdministration,loginAdministration,loginHR,getMyaccount,getEmpData,getWantedAdministrationList, updateInfo,forgotPasword,resetPassword,deleteEmployee}
 
 
