@@ -30,7 +30,7 @@ const employeeJdSchema = new mongoose.Schema({
     },
     timeIn : {
         type: String,  
-        required:true
+        default:"00:00"
     },
     jobRole : {
         type:String,

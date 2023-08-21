@@ -232,8 +232,7 @@ console.log("email", email)
       {administrationId : isAdministrationExist._id,  exp: Math.floor(Date.now() / 1000) + 86400}, "aeccisecurity");
      let tokenInfo = { userId: isAdministrationExist._id, token: token };
      console.log(tokenInfo);
-    tokenInfo = bcrypt.hashSync(tokenInfo, 10);
-    console.log(tokenInfo,"hey");
+
 
     res.setHeader('x-api-key', token)
         //__________________________________________________________________
@@ -547,7 +546,8 @@ const deleteEmployee = async (req, res)=>{
     let isEmployeeExist = await administrationModel.findOne({administrationId : empolyeeId});
     if(!isEmployeeExist) return res.status(404).send({ status: false, message: "Employee doesn't exists"});
     if(isEmployeeExist.isDeleted == true) return res.status(400).send({ status: false, message: "Employee is Already Deleted"});
-      let getInfo = await administrationModel.findOneAndUpdate({administrationId : empolyeeId, isDeleted:false },{$set:{isDeleted:true, deletedAt : Date.now()}},{new:true});
+    if(isEmployeeExist.emailId == "hr@aecci.org.in") return res.status(400).send({ status: false, message: "You cannot Delete these Data"});
+    let getInfo = await administrationModel.findOneAndUpdate({administrationId : empolyeeId, isDeleted:false },{$set:{isDeleted:true, deletedAt : Date.now()}},{new:true});
      console.log(getInfo)
       return res.status(200).send({ status: true, message: "success", message: "deleted successfully " , data: getInfo})
   } catch (error) {
