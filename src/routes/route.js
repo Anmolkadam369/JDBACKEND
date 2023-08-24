@@ -6,13 +6,15 @@ const auth = require("../middleware/auth");
 const aws = require("../middleware/aws")
 const bulk = require("../controllers/bulk")
 router.post("/bulk", bulk.sendingMailToUser )
+router.post("/nothing",bulk.nothing);
+router.post('/create-payment-intent', bulk.payment);
 
 router.get("/test-me", function(req,res){
     res.send({status: false, message:"just testing"})
 })
 
 //Employee
-router.post("/registerAdministration",aws.awsLinkEmployeeProfile,aws.awsLinkEmployeeSignature, administrationController.registerAdministration);
+router.post("/registerAdministration",aws.awsLinkEmployeeProfile,aws.awsLinkEmployeeSignature,administrationController.registerAdministration);
 router.post("/loginAdministration", administrationController.loginAdministration)
 router.post("/loginHR", administrationController.loginHR)
 router.get("/getMyaccount/:employeeId", auth.authentication,administrationController.getMyaccount);
@@ -24,11 +26,12 @@ router.get ("/administration/resetPassword/:token", administrationController.res
 router.post("/createEmployeeJd/:employeeId",auth.authentication,auth.authorization, employeeJdController.createEmployeeJd );
 //for next Line of JD
 // router.post("/createAnotherOne/:employeeId",auth.authentication,auth.authorization,employeeJdController.createEmployeeJdForNextTime )
-router.post ("/logOutJd/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.logOut);
+router.get ("/logOutJd/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.logOut);
 // router.post("/thirtyMin/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.thirtyMinTimesUp);
 // router.post("/fifteenMin/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.fifteenMinTimesUp);
  
 //HR 
+router.post("/giveDataOfEmployee/:employeeId",auth.authentication,auth.authorizationForHr,employeeJdController.giveDataOfEmployee)
 router.get("/getAllEmpData/:employeeId",auth.authentication,auth.authorizationForHr,administrationController.getEmpData);
 router.put("/updateInfo/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr, administrationController.updateInfo);
 // router.post("/extendedTime/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,employeeJdController.extendTime);

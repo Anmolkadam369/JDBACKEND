@@ -28,7 +28,7 @@ const authentication =  (req, res, next) => {
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message });
     }
-};
+}; 
 
 const authorization = async (req, res, next) => {
     try {
@@ -44,8 +44,8 @@ const authorization = async (req, res, next) => {
             if (!userData) {
                 return res.status(404).send({ status: false, message: "No user found for this UserId" });
             }
-            if(userData.emailId == "hr@aecci.org.in")
-            return res.status(400).send({ status: false, message: "You cannot create JD" });
+            // if(userData.emailId == "hr@aecci.org.in")
+            // return res.status(400).send({ status: false, message: "You cannot create JD" });
                 
             // If the userId in the request parameters is not the same as the userId from the token
             if (userData._id.toString() !== tokenId) {

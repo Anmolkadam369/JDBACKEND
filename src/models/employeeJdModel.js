@@ -26,7 +26,7 @@ const employeeJdSchema = new mongoose.Schema({
     },
     today:{
         type: String,  
-        required:true
+        // required:true
     },
     timeIn : {
         type: String,  
