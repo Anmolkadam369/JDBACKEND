@@ -26,17 +26,20 @@ router.get ("/administration/resetPassword/:token", administrationController.res
 router.post("/createEmployeeJd/:employeeId",auth.authentication,auth.authorization, employeeJdController.createEmployeeJd );
 //for next Line of JD
 // router.post("/createAnotherOne/:employeeId",auth.authentication,auth.authorization,employeeJdController.createEmployeeJdForNextTime )
+router.post("/requestForExtend/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.requestForExtend);
 router.get ("/logOutJd/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.logOut);
 // router.post("/thirtyMin/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.thirtyMinTimesUp);
 // router.post("/fifteenMin/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.fifteenMinTimesUp);
- 
+
 //HR 
 router.post("/giveDataOfEmployee/:employeeId",auth.authentication,auth.authorizationForHr,employeeJdController.giveDataOfEmployee)
 router.get("/getAllEmpData/:employeeId",auth.authentication,auth.authorizationForHr,administrationController.getEmpData);
 router.put("/updateInfo/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr, administrationController.updateInfo);
 // router.post("/extendedTime/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,employeeJdController.extendTime);
+router.post("/extendByHr/:employeeId",auth.authentication,auth.authorizationForHr,employeeJdController.extendByHr)
 router.get("/getWantedAdministrationList/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,employeeJdController.getWantedAdministrationList);
 router.get("/getWantedListByDate/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,employeeJdController.getWantedListByDate)
+router.get("/getExtendData/:employeeId", auth.authentication, auth.authorizationForHr,employeeJdController.getExtendData); 
 router.delete("/deleteEmp/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,administrationController.deleteEmployee)
 
 

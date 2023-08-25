@@ -44,6 +44,9 @@ const employeeJdSchema = new mongoose.Schema({
         type:String,
         default:"00:00"
     },
+    requestDone:{
+        type:Boolean
+    },
     preparedBy : {       
         //get data through reference and populate
         type:String, 
