@@ -6,6 +6,7 @@ let {ObjectId} = require('mongodb')
 let bcrypt = require('bcrypt');
 const { json } = require('express');
 let hrModel = require("../models/hrModel")
+const axios = require('axios');
 
 function generateRandomString(length) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -510,22 +511,13 @@ const getJdData = async (req,res)=>{
 
 const requestForExtend = async (req,res)=>{
     try {
+        let employeeId = req.params.employeeId;
         let jdId = req.params.jdId;
+        console.log(jdId)
+
         let data = req.body;
-        let {name,timeIn,isExtendedByHR, designation, employeeId}= data;
-        // let updateEmployeeData = await employeeJdModel.findOneAndUpdate({employeeJdId:jdId},{$set:{requestDone:false}},{new:true});
-        // if(!updateEmployeeData) return res.status(400).send({status: false, message:"No JD found"});
-        
-        if(!employeeId)
-        return res.status(400).send({status: false, message: "employeeId is required"});
-
-        if (employeeId == "")
-            return res.status(400).send({ status: false, message: "Please Enter employeeId value" });
-
-        if(typeof(employeeId) != "string")
-            return res.status(400).send({status: false, message: "employeeId should be in String"});
-    
-        
+        let {name,timeIn,isExtendedByHR, designation}= data;
+       
         if(!name)
         return res.status(400).send({status: false, message: "name is required"});
 
@@ -534,15 +526,6 @@ const requestForExtend = async (req,res)=>{
 
         if(typeof(name) != "string")
             return res.status(400).send({status: false, message: "name should be in String"});
-    
-        // if(!isExtendedByHR)
-        //     return res.status(400).send({status: false, message: "isExtendedByHR is required"});
-    
-        // if (isExtendedByHR == "")
-        //     return res.status(400).send({ status: false, message: "Please Enter isExtendedByHR value" });
-    
-        // if(typeof(isExtendedByHR) != "string")
-        //     return res.status(400).send({status: false, message: "isExtendedByHR should be in String"});
         
         if(!designation)
             return res.status(400).send({status: false, message: "designation is required"});
@@ -568,9 +551,14 @@ const requestForExtend = async (req,res)=>{
         if(!getJdData) return res.status(400).send({status: false, message:"No JD found"});
         console.log(getJdData)
         if(getJdData.logOut != "00:00") return res.status(400).send({status: false, message:"you have already logged out"});
-        let createData = await hrModel.create(data);
-        console.log(createData)
+        let createData = await hrModel.create(data)
+        
+        jdId = createData.employeeJdId = jdId; 
+        employeeId = createData.employeeId=employeeId;
+        let updatedData = await hrModel.findOneAndUpdate({designation:designation},{$set:{employeeJdId:jdId, employeeId:employeeId}},{new:true});
+        console.log(updatedData)
 
+        console.log("some")
         if(getJdData.requestDone === true) return res.status(200).send({status:true, message:"your time is extended !!!!"})
         if (getJdData.requestDone === false) return res.status(400).send({status:true, message:"your time isn't extended !!!!"})
         
@@ -594,16 +582,16 @@ const getExtendData = async (req,res)=>{
 const extendByHr = async(req,res)=>{
     try{
         let data = req.body;
-        let {employeeId, isExtended} = data;
+        let {employeeJdId, isExtended} = data;
 
-        if(!employeeId)
-            return res.status(400).send({status: false, message: "employeeId is required"});
+        if(!employeeJdId)
+            return res.status(400).send({status: false, message: "employeeJdId is required"});
     
-        if (employeeId == "")
-            return res.status(400).send({ status: false, message: "Please Enter employeeId value" });
+        if (employeeJdId == "")
+            return res.status(400).send({ status: false, message: "Please Enter employeeJdId value" });
     
-        if(typeof(employeeId) != "string")
-            return res.status(400).send({status: false, message: "employeeId should be in String"});
+        if(typeof(employeeJdId) != "string")
+            return res.status(400).send({status: false, message: "employeeJdId should be in String"});
 
         if(!isExtended)
             return res.status(400).send({status: false, message: "isExtended is required"});
@@ -614,12 +602,18 @@ const extendByHr = async(req,res)=>{
         if(typeof(isExtended) != "boolean")
             return res.status(400).send({status: false, message: "isExtended should be in boolean"});
 
-        let findData = await hrModel.findOneAndUpdate({employeeId:employeeId},{$set:{isExtendedByHR:isExtended}},{new:true});
+        let findData = await hrModel.findOneAndUpdate({employeeJdId:employeeJdId},{$set:{isExtendedByHR:isExtended}},{new:true});
        console.log(findData)
         if(!findData) return res.status(400).send({status: false, message:"No data found"});
         if (findData.isExtendedByHR === true) {
-            
+            const updatedData = await employeeJdModel.findOneAndUpdate({employeeJdId:employeeJdId},{$set:{requestDone:true}},{new:true});
+            return res.status(400).send({status: false, message: "update it to the true", data:updatedData});
         }
+        if (findData.isExtendedByHR === false) {
+            await employeeJdModel.findOneAndUpdate({employeeJdId:employeeJdId},{$set:{requestDone:false}},{new:true});
+            return res.status(400).send({status: false, message: "update it to the false"});
+        }
+
     }
     catch (err) { return res.status(500).send({ status: false, message: err.message }) }
 
@@ -631,7 +625,7 @@ module.exports = {extendByHr,getExtendData,requestForExtend,giveDataOfEmployee,c
 
 
 
-
+ 
 
 
 
