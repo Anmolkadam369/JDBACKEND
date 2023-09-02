@@ -27,7 +27,7 @@ router.post("/createEmployeeJd/:employeeId",auth.authentication,auth.authorizati
 //for next Line of JD
 // router.post("/createAnotherOne/:employeeId",auth.authentication,auth.authorization,employeeJdController.createEmployeeJdForNextTime )
 router.post("/requestForExtend/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.requestForExtend);
-router.get ("/logOutJd/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.logOut);
+router.post ("/logOutJd/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.logOut);
 // router.post("/thirtyMin/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.thirtyMinTimesUp);
 // router.post("/fifteenMin/:employeeId/:jdId",auth.authentication,auth.authorization, employeeJdController.fifteenMinTimesUp);
 
@@ -43,9 +43,9 @@ router.get("/getExtendData/:employeeId", auth.authentication, auth.authorization
 router.delete("/deleteEmp/:employeeId/:normalEmployee",auth.authentication,auth.authorizationForHr,administrationController.deleteEmployee)
 
 
-router.all("*/", async(req,res)=>{
-    return res.status(404).send({status: false, message:"invalid path"})
-})
+// router.all("*/", async(req,res)=>{
+//     return res.status(404).send({status: false, message:"invalid path"})
+// })
 
 
 

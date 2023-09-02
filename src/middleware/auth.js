@@ -82,7 +82,7 @@ const authorizationForHr = async (req, res, next) => {
             if(userData.emailId !== "hr@aecci.org.in")
             return res.status(400).send({ status: false, message: "You Are Not Authorize" });
                 
-            console.log(paramUserId , " ", tokenId)
+            console.log(userData._id.toString() , " ", tokenId)
             // If the userId in the request parameters is not the same as the userId from the token
             if (userData._id.toString() !== tokenId) {
                 return res.status(403).send({ status: false, message: "Unauthorized User Access" });
