@@ -546,6 +546,12 @@ const requestForExtend = async (req,res)=>{
         if(typeof(timeIn) != "string")
             return res.status(400).send({status: false, message: "timeIn should be in String"});
     
+        let getData = await hrModel.findOne({designation:designation,employeeJdId:jdId, isDeleted:true});
+        console.log("getData            ",getData)
+        if(getData){
+            if(getData.isExtendedByHR === true) return res.status(200).send({status:true, message:"your time is extended1 !!!!"})
+            if(getData.isExtendedByHR === false) return res.status(400).send({status:true, message:"your time isn't extended1 !!!!"})
+        } 
         
         let getJdData = await employeeJdModel.findOne({employeeJdId:jdId});
         console.log(getJdData)
@@ -557,33 +563,31 @@ const requestForExtend = async (req,res)=>{
         jdId = createData.employeeJdId = jdId; 
         employeeId = createData.employeeId=employeeId;
         let updatedData = await hrModel.findOneAndUpdate({designation:designation},{$set:{employeeJdId:jdId, employeeId:employeeId}},{new:true});
-        console.log(updatedData,"updatedData")
         // res.send(updatedData)
-        if(updatedData){
-            const postData = {
-                employeeJdId :"empJd_HKNcYUxQAx",
-                isExtended :true
-              };
-            const authToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbmlzdHJhdGlvbklkIjoiNjRkZjQ3NWQ1NDc0MmY2MWFiNzhkZjI0IiwiZXhwIjoxNjkzMTI3MTQ4LCJpYXQiOjE2OTMwNDA3NDh9.QC2qRGNFD4BrO6miBgvhOCXCYAWPFBVo24n2_Vx1PaA'
-            const headers = {  
-                Authorization: `Bearer ${authToken}`
-              };
-              console.log(headers)
+    //     if(updatedData){
+    //         const postData = {
+    //             employeeJdId :"empJd_HKNcYUxQAx",
+    //             isExtended :true
+    //           };
+    //         const authToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbmlzdHJhdGlvbklkIjoiNjRkZjQ3NWQ1NDc0MmY2MWFiNzhkZjI0IiwiZXhwIjoxNjk0OTM3MzQ1LCJpYXQiOjE2OTQ4NTA5NDV9.ive56iSLEvGkK43pNEFEnYYnBZ4V8TuSiDYyOmM8FPQ'
+    //         const headers = {  
+    //             Authorization: `Bearer ${authToken}`
+    //           };
+    //           console.log(headers)
               
-              const employeeId = "emp_ERRxKu65fT"        
-            //   const postEndpoint = `http://localhost:3001/extendByHr/${employeeId}`;
+    //           const employeeId = "emp_ERRxKu65fT"        
+    //         //   const postEndpoint = `http://localhost:3001/extendByHr/${employeeId}`;
 
-                const response = await axios.post(`http://localhost:3001/extendByHr/${employeeId}`, postData, { headers });
-                console.log("my response:", response.data, "some")
-                // return response;
+    //             const response = await axios.post(`http://localhost:3001/extendByHr/${employeeId}`, postData, { headers });
+    //             console.log("my response:", response.data, "some")
+    //             // return response;
 
-              // Construct the dynamic endpoint using string interpolation   
-            //   const response = await axios.get(`http://localhost:3001/getExtendData/${employeeId}`, { headers });
-            //   console.log(response.data)
-    }
-        console.log("somekkkkkkkkkkkkk")
-        if(getJdData.requestDone === true) return res.status(200).send({status:true, message:"your time is extended !!!!"})
-        if (getJdData.requestDone === false) return res.status(400).send({status:true, message:"your time isn't extended !!!!"})
+    //           // Construct the dynamic endpoint using string interpolation   
+    //         //   const response = await axios.get(`http://localhost:3001/getExtendData/${employeeId}`, { headers });
+    //         //   console.log(response.data)
+    // }
+    //     console.log("somekkkkkkkkkkkkk")
+    return res.status(200).send({status:true, message:"your request has been sent to hr"})
         
     } 
     catch (err) { return res.status(500).send({ status: false, message: err.message }) }
@@ -624,22 +628,21 @@ const extendByHr = async(req,res)=>{
         return res.status(400).send({status: false, message: "isExtended should be in boolean"});
 
             console.log(isExtended)
-        let findData = await hrModel.findOneAndUpdate({employeeJdId:employeeJdId},{$set:{isExtendedByHR:isExtended}},{new:true});
+        let findData = await hrModel.findOneAndUpdate({employeeJdId:employeeJdId},{$set:{isExtendedByHR:isExtended, isDeleted:true}},{new:true});
        console.log("kkkkkkkkkkkkkk",findData)
         if(!findData) return res.status(400).send({status: false, message:"No data found"});
-        if (findData.isExtendedByHR === true) {
-            const updatedData = await employeeJdModel.findOneAndUpdate({employeeJdId:employeeJdId},{$set:{requestDone:true}},{new:true});
-            console.log("update it to the true")
-            res.status(200).send({status: false, message: "update it to the true", data:updatedData});
-        }
-        if (findData.isExtendedByHR === false) {
-            const updatedData =await employeeJdModel.findOneAndUpdate({employeeJdId:employeeJdId},{$set:{requestDone:false}},{new:true});
-            console.log("update it to the false")
-            res.status(200).send({status: false, message: "update it to the false", data:updatedData});
+        return res.status(200).send({status: false, message:`brooo : ${findData.isExtendedByHR}`});
+        // if (findData.isExtendedByHR === true) {
+        //     const updatedData = await employeeJdModel.findOneAndUpdate({employeeJdId:employeeJdId},{$set:{requestDone:true}},{new:true});
+        //     console.log("update it to the true")
+        //     res.status(200).send({status: false, message: "update it to the true", data:updatedData});
+        // }
+        // if (findData.isExtendedByHR === false) {
+        //     const updatedData =await employeeJdModel.findOneAndUpdate({employeeJdId:employeeJdId},{$set:{requestDone:false}},{new:true});
+        //     console.log("update it to the false")
+        //     res.status(200).send({status: false, message: "update it to the false", data:updatedData});
             
         }
-
-    }
     catch (err) { return res.status(500).send({ status: false, message: err.message }) }
 
 }
